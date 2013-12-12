@@ -4,6 +4,9 @@ block content
   h1= title
   p Welcome to #{title}
   ul
-    each val in res
-      li
-        a(href='/q/' + val.name)= val.name
+    if res == []
+      each val in res
+        li
+          a(href='/q/' + val.name)= val.name
+    else
+      p No queries setup yet
