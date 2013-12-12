@@ -103,3 +103,10 @@ exports.q = function(req, res) {
                 }
         });
 };
+
+exports.setupDB = function (conn) {
+        r.dbCreate('rethink_miner').run(conn, function(err, result) {
+                r.db('rethink_miner').tableCreate('queries').run(conn, function(err, result) {
+                })
+        })
+}

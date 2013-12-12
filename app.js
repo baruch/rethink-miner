@@ -44,6 +44,7 @@ rdb.connect({host: dbConfig.host, port: dbConfig.port}, function(err, connection
     process.exit(1);
   }
   else {
+    routes.setupDB(connection)
     // set up the default database for the connection
     connection.use(dbConfig['db']);
     // set up the module global connection
