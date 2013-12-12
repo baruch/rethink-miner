@@ -1,0 +1,16 @@
+{
+  "name": "rethink-miner",
+  "version": "0.0.1",
+  "author": "Baruch Even <baruch@ev-en.org>",
+  "description": "A webapp to help mine data in a rethinkdb database",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "express": "3.4.7",
+    "jade": "*",
+    "rethinkdb": "1.11.x",
+    "debug": "*"
+  }
+}

@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1= Name
+  p Query #{name}
+  p Code #{code}
+
+  table
+    tr
+      each header in headers
+        th= header
+    each entry in res
+      tr
+        each field in entry
+          td= field
