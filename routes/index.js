@@ -11,6 +11,11 @@ debug = console.log
 
 exports.index = function(req, res){
     r.table('queries').run(self.connection, function(err, cursor) {
+        if (err) {
+                debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
+                res.render('index', {title: 'Error querying db', res:[]})
+                return
+        }
         cursor.toArray(function(err, results) {
             if(err) {
                 debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
