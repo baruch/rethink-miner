@@ -1,3 +1,4 @@
+//jslint node: true
 
 /**
  * Module dependencies.
@@ -24,7 +25,7 @@ app.use(app.router);
 app.use(express.static(path.join(__dirname, 'public')));
 
 // development only
-if ('development' == app.get('env')) {
+if ('development' === app.get('env')) {
   app.use(express.errorHandler());
 }
 
@@ -34,7 +35,7 @@ app.get('/q/:name', routes.q);
 var dbConfig = {
   host : process.env.RDB_HOST || 'localhost',
   port : parseInt(process.env.RDB_PORT) || 28015,
-  db   : process.env.RDB_DB || 'rethink_miner',
+  db   : process.env.RDB_DB || 'rethink_miner'
 };  
 
 // Using a single db connection for the app
@@ -44,9 +45,9 @@ rdb.connect({host: dbConfig.host, port: dbConfig.port}, function(err, connection
     process.exit(1);
   }
   else {
-    routes.setupDB(connection)
+    routes.setupDB(connection);
     // set up the default database for the connection
-    connection.use(dbConfig['db']);
+    connection.use(dbConfig.db);
     // set up the module global connection
     routes.connection = connection;
     // start serving requests
