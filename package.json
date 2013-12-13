@@ -17,4 +17,9 @@
     "type": "git",
     "url": "https://github.com/baruch/rethink-miner.git"
   },
+  "keywords": {
+    "server",
+    "rethinkdb",
+    "mining"
+  }
 }
