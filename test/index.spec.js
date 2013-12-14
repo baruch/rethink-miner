@@ -22,9 +22,12 @@ describe('index page', function() {
   });
 
   it('should contain an add link', function() {
-    assert.equal(this.browser.text('a#add'), 'Add');
+    assert.ok(this.browser.link('Add'));
   });
 
-  it('should list available queries');
+  it('should list available queries', function() {
+    assert.ok(this.browser.link('Temperature Average'));
+  });
+
   it('When no queries availble it should say so');
 });
