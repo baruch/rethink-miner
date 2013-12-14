@@ -15,4 +15,11 @@ After you have such a query or two go the index page and you'll be able to choos
 
 rethink-miner uses nodejs, express and rethinkdb.
 
+CAVEATS
+-------
+
+rethink-miner uses eval() internally to run the query, this means that this is a rather insecure webapp which will enable the user to take control over the server. This will be mitigated in the future by parsing the query and making sure nothing dangerous is happening inside it or by it but for now this is a limitation to be aware of.
+
+Do not expose the webapp to possibly malicious users!
+
 Baruch Even <baruch@ev-en.org>
