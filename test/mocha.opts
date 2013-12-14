@@ -1,0 +1,5 @@
+--require test/testHooks.js
+--reporter spec
+--recursive
+--ui bdd
+--timeout 10000
