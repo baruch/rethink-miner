@@ -161,9 +161,7 @@ function test_queries() {
   ];
 }
 
-exports.setupDB = function (conn) {
-  dbName = 'rethink_miner';
-
+exports.setupDB = function (conn, dbName) {
   r.dbCreate(dbName).run(conn, function(err, result) {
     r.db(dbName).tableCreate('queries', {primaryKey: 'name'}).run(conn, function(err, result) {
       if (result && result.created === 1) {

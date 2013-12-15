@@ -18,7 +18,7 @@ describe('index page', function() {
   });
 
   it('should work', function() {
-    assert.ok(this.browser.success);
+    this.browser.success.should.be.ok;
   });
 
   it('should contain an add link', function() {
@@ -29,5 +29,7 @@ describe('index page', function() {
     assert.ok(this.browser.link('Temperature Average'));
   });
 
-  it('When no queries availble it should say so');
+  it('When no queries availble it should say so');//, function() {
+    //assert.ok(this.browser.text('p'), 'No queries setup yet');
+  //});
 });
