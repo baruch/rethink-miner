@@ -1,7 +1,7 @@
-all: npmtest lint
+all: test lint
 
-npmtest:
-	npm test
+test:
+	mocha
 
 lint:
 	PATH=node_modules/.bin:${PATH} jshint app.js routes/index.js
@@ -9,4 +9,4 @@ lint:
 run:
 	PATH=node_modules/.bin:${PATH} RDB_HOST=nas nodemon app.js
 
-.PHONY: all lint
+.PHONY: all test lint
