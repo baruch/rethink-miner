@@ -11,12 +11,14 @@ exports.index = function(req, res){
   r.table('queries').run(self.connection, function(err, cursor) {
     if (err) {
       debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
+      res.status(500);
       res.render('error', {title: 'Error querying db', description:err});
       return;
     }
     cursor.toArray(function(err, results) {
       if(err) {
         debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
+        res.status(500);
         res.render('error', {title: 'No results', description: err});
       }
       else{
@@ -55,9 +57,11 @@ function prepare_table(fields_list, results) {
 exports.q = function(req, res) {
   r.table('queries').get(req.params.name).run(self.connection, function(err, result) {
     if (err) {
+      res.status(500);
       return res.render('error', {title: 'Error querying database', description: err});
     }
     if (result === null) {
+      res.status(500);
       return res.render('error', {title: 'No results found for query "' + req.params.name + '"'});
     }
     query = result.query;
@@ -71,6 +75,7 @@ exports.q = function(req, res) {
           cursor.toArray(function(err, results) {
             if (err) {
               debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
+              res.status(500);
               res.render('error', {title: 'Failed to convert query to array', description:err});
             } else {
               d = prepare_table(fields_list, results);
@@ -94,6 +99,7 @@ exports.q = function(req, res) {
         });
       }
       catch (e) {
+        res.status(500);
         res.render('query', {name: req.params.name, code: query, headers:['Failed to run query'], res: [[e.toString()]]});
       }
     } else {
