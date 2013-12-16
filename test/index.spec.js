@@ -1,16 +1,14 @@
 describe('index page', function() {
 
-  before(function() {
-    this.server = http.createServer(app).listen(3333);
-    this.browser = new Browser({site: 'http://localhost:3333' });
+  before(function(done) {
+    this.app = require('../app');
+    this.server = http.createServer(this.app).listen(3335);
+    this.browser = new Browser({site: 'http://localhost:3335' });
+    this.app.initDb(done);
   });
   after(function(done) {
     this.browser.close();
     this.server.close(done);
-    db = app.get('db');
-    if (db) {
-      db.close(function(err) {});
-    }
   });
 
   beforeEach(function(done) {
@@ -29,7 +27,4 @@ describe('index page', function() {
     assert.ok(this.browser.link('Temperature Average'));
   });
 
-  it('When no queries availble it should say so');//, function() {
-    //assert.ok(this.browser.text('p'), 'No queries setup yet');
-  //});
 });
