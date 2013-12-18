@@ -31,6 +31,8 @@ if ('development' === app.get('env')) {
 
 app.get('/', routes.index);
 app.get('/q/:name', routes.q);
+app.get('/add', routes.addShow)
+app.post('/add', routes.addSaveOrTest)
 
 var dbConfig = {
   host : process.env.RDB_HOST || 'localhost',

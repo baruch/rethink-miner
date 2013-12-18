@@ -31,7 +31,7 @@ exports.index = function(req, res){
 function prepare_table(fields_list, results) {
   headers = [];
   fields = [];
-  if (fields_list === null) {
+  if (!fields_list) {
     fields = Object.keys(results[0]);
     headers = Object.keys(results[0]);
     if (fields.indexOf('reduction') != -1) {
@@ -54,59 +54,107 @@ function prepare_table(fields_list, results) {
   return [headers, fields];
 }
 
-exports.q = function(req, res) {
-  r.table('queries').get(req.params.name).run(self.connection, function(err, result) {
+function doQuery(queryName, query, fields_list, cb) {
+    try {
+      q = eval(query);
+
+      q.run(self.connection, function(err, cursor) {
+        if (err) {
+          return cb(err, {title: 'Failed to run user query', description: err});
+        }
+        cursor.toArray(function(err, results) {
+          if (err) {
+            debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
+            return cb(err, {title: 'Failed to convert query to array', description:err});
+          } else {
+            d = prepare_table(fields_list, results);
+            headers = d[0];
+            fields = d[1];
+            entries = [];
+            results.forEach(function(res) {
+              entry = [];
+              fields.forEach(function(field) {
+                if (typeof field == "string") {
+                  entry.push(res[field]);
+                } else {
+                  entry.push(field(res));
+                }
+              });
+              entries.push(entry);
+            });
+            cb(null, {result: {name: queryName, code: query, headers:headers, res: entries}});
+          }
+        });
+      });
+    }
+    catch (e) {
+      return cb(e, {title: 'Failed to run query', description: e.toString()})
+    }
+}
+
+function doQueryByName(queryName, cb) {
+  r.table('queries').get(queryName).run(self.connection, function(err, result) {
     if (err) {
-      res.status(500);
-      return res.render('error', {title: 'Error querying database', description: err});
+      return cb(err, {title: 'Error querying database', description: err});
     }
     if (result === null) {
-      res.status(500);
-      return res.render('error', {title: 'No results found for query "' + req.params.name + '"'});
+      s = 'No results found for query "' + queryName + '"';
+      return cb(new Error(s), {title: s});
     }
     query = result.query;
     fields_list = result.fields;
-    if (1) {
-
-      try {
-        q = eval(query);
-
-        q.run(self.connection, function(err, cursor) {
-          cursor.toArray(function(err, results) {
-            if (err) {
-              debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
-              res.status(500);
-              res.render('error', {title: 'Failed to convert query to array', description:err});
-            } else {
-              d = prepare_table(fields_list, results);
-              headers = d[0];
-              fields = d[1];
-              entries = [];
-              results.forEach(function(res) {
-                entry = [];
-                fields.forEach(function(field) {
-                  if (typeof field == "string") {
-                    entry.push(res[field]);
-                  } else {
-                    entry.push(field(res));
-                  }
-                });
-                entries.push(entry);
-              });
-              res.render('query', {name: req.params.name, code: query, headers:headers, res: entries});
-            }
-          });
-        });
-      }
-      catch (e) {
-        res.status(500);
-        res.render('query', {name: req.params.name, code: query, headers:['Failed to run query'], res: [[e.toString()]]});
-      }
-    } else {
-      res.render('query', {name: req.params.name, code: query, res: []});
-    }
+    doQuery(queryName, query, fields_list, cb);
   });
+}
+
+exports.q = function(req, res) {
+  doQueryByName(req.params.name,
+      function(err, response) {
+        if (err) {
+          res.status(500);
+          res.render('error', response);
+          return;
+        }
+
+        res.render('query', response);
+      }
+  );
 };
+
+exports.addShow = function (req, res) {
+  res.render('add', null);
+}
+
+function addSave(req, res) {
+  res.render('add', null);
+}
+
+function addTest(req, res) {
+  name = req.body.name;
+  query = req.body.query;
+  if (name && query) {
+    doQuery('Testing ' + name, query, null, function(err, result) {
+      if (err) {
+        // TODO: Need to output the error here
+        res.render('add', {name: name, query: query, result: 0});
+      }
+      res.render('add', result);
+    });
+  } else {
+    res.render('add', {name: name, query: query, result: 0});
+  }
+}
+
+exports.addSaveOrTest = function (req, res) {
+  if (req.body.action == 'Save') {
+    return addSave(req, res);
+  } else if (req.body.action == 'Test') {
+    return addTest(req, res);
+  } else {
+    res.status(404);
+    res.render('error', {title: 'Unknown action in add'});
+  }
+}
 
 function test_data() {
   return [

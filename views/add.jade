@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1 Add Query
+  div
+    form(action='/add',method='post')
+      fieldset
+        label(for='name') Name: 
+        input(id='name', name='name', type='text', value=name)
+      fieldset
+        label(for='query') Query: 
+        input(id='query', name='query', type='text', value=query)
+      input(type='submit', name='action', value='Save').submit-button
+      input(type='submit', name='action', value='Test').submit-button
+  div.result
+    if result
+      include inc_query_table
+    else
+      p no result

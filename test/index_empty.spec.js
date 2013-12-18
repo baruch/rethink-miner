@@ -1,10 +1,16 @@
 describe('index page when empty', function() {
 
   before(function(done) {
-    this.app = require('../app');
-    this.server = http.createServer(this.app).listen(3334);
-    this.browser = new Browser({site: 'http://localhost:3334' });
-    this.app.initDb(done);
+    d = done;
+    self = this;
+    port = 3335;
+    process.env.RDB_DB = 'rethink_miner_test_db_' + port;
+    dropDb(function () {
+      self.app = require('../app');
+      self.server = http.createServer(self.app).listen(port);
+      self.browser = new Browser({site: 'http://localhost:' + port });
+      self.app.initDb(d);
+    });
   });
   after(function(done) {
     this.browser.close();

@@ -1,10 +1,16 @@
 describe('index page', function() {
 
   before(function(done) {
-    this.app = require('../app');
-    this.server = http.createServer(this.app).listen(3335);
-    this.browser = new Browser({site: 'http://localhost:3335' });
-    this.app.initDb(done);
+    self = this;
+    d = done;
+    port = 3333;
+    process.env.RDB_DB = 'rethink_miner_test_db_' + port;
+    dropDb(function () {
+      self.app = require('../app');
+      self.server = http.createServer(self.app).listen(port);
+      self.browser = new Browser({site: 'http://localhost:' + port });
+      self.app.initDb(d);
+    });
   });
   after(function(done) {
     this.browser.close();
