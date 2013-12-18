@@ -126,7 +126,12 @@ exports.addShow = function (req, res) {
 }
 
 function addSave(req, res) {
-  res.render('add', null);
+  name = req.body.name;
+  query = req.body.query;
+  if (name && query) {
+  } else {
+    res.render('add', {name: name, query: query, msg: 'fields failed validation'});
+  }
 }
 
 function addTest(req, res) {
