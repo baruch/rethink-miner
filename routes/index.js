@@ -129,8 +129,17 @@ function addSave(req, res) {
   name = req.body.name;
   query = req.body.query;
   if (name && query) {
+    r.table('queries').insert({name: name, query: query}).run(self.connection, function(err, result) {
+      if (err) {
+        return res.render('add', {name: name, query: query, msg: 'Save failed with error: ' + err});
+      } else if (result.inserted > 0) {
+        return res.render('add', {name: name, query: query, msg: 'Saved'});
+      } else {
+        return res.render('add', {name: name, query: query, msg: 'Failed to save for: ' + result.first_error});
+      }
+    });
   } else {
-    res.render('add', {name: name, query: query, msg: 'fields failed validation'});
+    return res.render('add', {name: name, query: query, msg: 'fields failed validation'});
   }
 }
 
