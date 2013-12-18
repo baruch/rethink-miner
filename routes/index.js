@@ -141,12 +141,12 @@ function addTest(req, res) {
     doQuery('Testing ' + name, query, null, function(err, result) {
       if (err) {
         // TODO: Need to output the error here
-        res.render('add', {name: name, query: query, result: 0});
+        res.render('add', {name: name, query: query});
       }
       res.render('add', result);
     });
   } else {
-    res.render('add', {name: name, query: query, result: 0});
+    res.render('add', {name: name, query: query, msg: 'Fields failed validation'});
   }
 }
 
