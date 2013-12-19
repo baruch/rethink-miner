@@ -1,5 +1,6 @@
 var r = require('rethinkdb'),
     debug = require('debug')('rdb'),
+    csv = require('express-csv'),
     self = this;
 
 
@@ -121,7 +122,13 @@ exports.q = function(req, res) {
           return;
         }
 
-        res.render('query', response);
+        if (req.query.format == 'csv') {
+          answer = [response.result.headers].concat(response.result.res);
+          console.log(answer);
+          res.csv(answer);
+        } else {
+          res.render('query', response);
+        }
       }
   );
 };
