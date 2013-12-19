@@ -54,8 +54,12 @@ function prepare_table(fields_list, results) {
   return [headers, fields];
 }
 
-function doQuery(queryName, query, fields_list, cb) {
+function doQuery(queryName, query, fields_list, order_by, cb) {
     try {
+      if (order_by && query) {
+        query += ".orderBy('" + order_by + "')"
+      }
+
       q = eval(query);
 
       q.run(self.connection, function(err, cursor) {
@@ -82,7 +86,7 @@ function doQuery(queryName, query, fields_list, cb) {
               });
               entries.push(entry);
             });
-            cb(null, {result: {name: queryName, code: query, headers:headers, res: entries}});
+            cb(null, {result: {name: queryName, code: query, headers:headers, res: entries, order: order_by}});
           }
         });
       });
@@ -92,7 +96,7 @@ function doQuery(queryName, query, fields_list, cb) {
     }
 }
 
-function doQueryByName(queryName, cb) {
+function doQueryByName(queryName, order_by, cb) {
   r.table('queries').get(queryName).run(self.connection, function(err, result) {
     if (err) {
       return cb(err, {title: 'Error querying database', description: err});
@@ -103,12 +107,13 @@ function doQueryByName(queryName, cb) {
     }
     query = result.query;
     fields_list = result.fields;
-    doQuery(queryName, query, fields_list, cb);
+
+    doQuery(queryName, query, fields_list, order_by, cb);
   });
 }
 
 exports.q = function(req, res) {
-  doQueryByName(req.params.name,
+  doQueryByName(req.params.name, req.query.order,
       function(err, response) {
         if (err) {
           res.status(500);
@@ -147,7 +152,7 @@ function addTest(req, res) {
   name = req.body.name;
   query = req.body.query;
   if (name && query) {
-    doQuery('Testing ' + name, query, null, function(err, result) {
+    doQuery('Testing ' + name, query, null, null, function(err, result) {
       if (err) {
         // TODO: Need to output the error here
         res.render('add', {name: name, query: query});

@@ -5,7 +5,11 @@ p Code #{result.code}
 table
   tr
     each header in result.headers
-      th= header
+      th
+        if result.order == header
+          i= header
+        else
+          a(href='?order=' + header)= header
   each entry in result.res
     tr
       each field in entry
