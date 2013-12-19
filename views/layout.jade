@@ -2,7 +2,25 @@ doctype 5
 html
   head
     title= title
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(rel='stylesheet', href='/stylesheets/bootstrap.min.css')
     link(rel='stylesheet', href='/stylesheets/bootstrap-theme.min.css')
+    style
+      body { padding-top: 70px; }
   body
-    block content
+    div(role='navigation', class=['navbar', 'navbar-inverse', 'navbar-fixed-top'])
+      div.container
+        button(type='button', class='navbar-toggle', 'data-toggle'='collapse', 'data-target'='.navbar-collapse')
+          span.sr-only Toggle navigation
+          span.icon-bar
+          span.icon-bar
+          span.icon-bar
+        a(class='navbar-brand', href='/') Rethink-Miner
+        div(class=['collapse', 'navbar-collapse'])
+          ul(class=['nav', 'navbar-nav'])
+            li.active
+              a(href='/') Home
+            li
+              a(href='/add') Add
+    div.container
+      block content
