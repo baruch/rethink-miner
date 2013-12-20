@@ -1,6 +1,11 @@
-h1= Name
-p Query #{result.name}
-p Code #{result.code}
+div.panel-group#accordion
+  div(class=['panel', 'panel-default'])
+    h1.panel-title
+      a(href='#collapseOne', 'data-toggle'='collapse', 'data-parent'='#accordion')
+        | Query: #{result.name}
+  div(class=['panel-collapse', 'collapse'], id='collapseOne')
+    div.panel-body
+      | Code: #{result.code}
 
 table.table-striped.table
   tr
