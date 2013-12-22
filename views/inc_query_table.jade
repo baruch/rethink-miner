@@ -7,15 +7,15 @@ div.panel-group#accordion
     div.panel-body
       | Code: #{result.code}
 
-table.table-striped.table
-  tr
-    each header in result.headers
-      th
-        if result.order == header
-          i= header
-        else
-          a(href='?order=' + header)= header
-  each entry in result.res
+script(src='/javascripts/sorttable.js')
+table(class=['table-striped', 'table', 'sortable'])
+  thead
     tr
-      each field in entry
-        td= field
+      each header in result.headers
+        th
+          | #{header}
+  tbody
+    each entry in result.res
+      tr
+        each field in entry
+          td= field
