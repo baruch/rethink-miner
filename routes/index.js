@@ -29,22 +29,48 @@ exports.index = function(req, res){
   });
 };
 
+function unpack_object(result, headers, fields, unpack_field) {
+  red = Object.keys(result[unpack_field]);
+  red.forEach(function(field) {
+    fields.push(function(f) {
+      return f[unpack_field][field];
+    });
+    headers.push(field);
+  });
+  console.log('unpack');
+  console.log(headers);
+  console.log(fields);
+  return [headers, fields];
+}
+
 function prepare_table(fields_list, results) {
   headers = [];
   fields = [];
   if (!fields_list) {
-    fields = Object.keys(results[0]);
-    headers = Object.keys(results[0]);
+    result0 = results[0]
+    fields = Object.keys(result0);
+    headers = Object.keys(result0);
     if (fields.indexOf('reduction') != -1) {
-      fields.pop(); // Assume it is last
-      headers.pop();
-      red = Object.keys(results[0].reduction);
-      red.forEach(function(field) {
-        fields.push(function(f) {
-          return f.reduction[field];
-        });
-        headers.push(field);
-      });
+      if (typeof(result0['reduction']) == 'object') {
+        // This is a groupedMapReduce
+        reduction_field = fields.indexOf('reduction');
+        reduced_field = fields.splice(reduction_field, 1);
+        reduced_header = headers.splice(reduction_field, 1);
+
+        d = unpack_object(result0, headers, fields, 'reduction');
+        headers = d[0];
+        fields = d[1];
+      } else if (typeof(result0['group']) == 'object') {
+        // This is a groupBy
+        group_field = fields.indexOf('group');
+        grouped_field = fields.splice(group_field, 1);
+        grouped_header = headers.splice(group_field, 1);
+
+        d = unpack_object(result0, headers, fields, 'group');
+        headers = d[0];
+        fields = d[1];
+      }
+
     }
   } else {
     fields_list.forEach(function(field) {
@@ -52,6 +78,7 @@ function prepare_table(fields_list, results) {
       headers.push(field[1]);
     });
   }
+  console.log(headers);
   return [headers, fields];
 }
 
@@ -87,7 +114,7 @@ function doQuery(queryName, query, fields_list, order_by, cb) {
               });
               entries.push(entry);
             });
-            cb(null, {result: {name: queryName, code: query, headers:headers, res: entries, order: order_by}});
+            cb(null, {'result': {'name': queryName, 'query': query, 'headers':headers, 'res': entries, 'order': order_by}});
           }
         });
       });
@@ -162,8 +189,10 @@ function addTest(req, res) {
     doQuery('Testing ' + name, query, null, null, function(err, result) {
       if (err) {
         // TODO: Need to output the error here
-        res.render('add', {name: name, query: query});
+        res.render('add', {name: name, query: query, msg: err});
       }
+
+      console.log(result); //TODO: remove debug print
       res.render('add', result);
     });
   } else {

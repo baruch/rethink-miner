@@ -5,17 +5,24 @@ div.panel-group#accordion
         | Query: #{result.name}
   div(class=['panel-collapse', 'collapse'], id='collapseOne')
     div.panel-body
-      | Code: #{result.code}
+      | Code: #{result.query}
 
-script(src='/javascripts/sorttable.js')
-table(class=['table-striped', 'table', 'sortable'])
-  thead
-    tr
-      each header in result.headers
-        th
-          | #{header}
-  tbody
-    each entry in result.res
+script(src='/javascripts/sorttable.js').
+
+if result.headers
+  table(class=['table-striped', 'table', 'sortable'])
+    thead
       tr
-        each field in entry
-          td= field
+        each header in result.headers
+          th= header
+    tbody
+      if result.res
+        each entry in result.res
+          tr
+            each field in entry
+              td= field
+      else
+        tr
+          td(colspan="#{headers.length}") no results
+else
+  div No headers for some reason 
