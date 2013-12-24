@@ -5,15 +5,19 @@ block content
   if msg
     div= msg
   div
-    form(action='/add',method='post')
-      fieldset
-        label(for='name') Name: 
-        input(id='name', name='name', type='text', value=name)
-      fieldset
-        label(for='query') Query: 
-        input(id='query', name='query', type='text', value=query)
-      input(type='submit', name='action', value='Save').submit-button
-      input(type='submit', name='action', value='Test').submit-button
+    form(action='/add',method='post',role='form').form-horizontal
+      div.form-group
+        label(for='name').col-sm-2.control-label Name: 
+        div.col-sm-10
+          input(id='name', name='name', type='text', value=name).form-control
+      div.form-group
+        label(for='query').col-sm-2.control-label Query: 
+        div.col-sm-10
+          input(id='query', name='query', type='text', value=query).form-control
+      div.form-group
+        div.col-sm-offset-2.col-sm-10
+          input(type='submit', name='action', value='Save').btn.btn-default
+          input(type='submit', name='action', value='Test').btn.btn-default
   div
     if result
       include inc_query_table
