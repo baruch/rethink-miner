@@ -82,6 +82,32 @@ function prepare_table(fields_list, results) {
   return [headers, fields];
 }
 
+function query_result_object(cursor, queryName, query, fields_list, order_by, cb) {
+  cursor.toArray(function(err, results) {
+    if (err) {
+      debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
+      return cb(err, {title: 'Failed to convert query to array', description:err});
+    } else {
+      d = prepare_table(fields_list, results);
+      headers = d[0];
+      fields = d[1];
+      entries = [];
+      results.forEach(function(res) {
+        entry = [];
+        fields.forEach(function(field) {
+          if (typeof field == "string") {
+            entry.push(res[field]);
+          } else {
+            entry.push(field(res));
+          }
+        });
+        entries.push(entry);
+      });
+      cb(null, {'result': {'name': queryName, 'query': query, 'headers':headers, 'res': entries, 'order': order_by}});
+    }
+  });
+}
+
 function doQuery(queryName, query, fields_list, order_by, cb) {
     try {
       if (order_by && query) {
@@ -94,29 +120,11 @@ function doQuery(queryName, query, fields_list, order_by, cb) {
         if (err) {
           return cb(err, {title: 'Failed to run user query', description: err});
         }
-        cursor.toArray(function(err, results) {
-          if (err) {
-            debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
-            return cb(err, {title: 'Failed to convert query to array', description:err});
-          } else {
-            d = prepare_table(fields_list, results);
-            headers = d[0];
-            fields = d[1];
-            entries = [];
-            results.forEach(function(res) {
-              entry = [];
-              fields.forEach(function(field) {
-                if (typeof field == "string") {
-                  entry.push(res[field]);
-                } else {
-                  entry.push(field(res));
-                }
-              });
-              entries.push(entry);
-            });
-            cb(null, {'result': {'name': queryName, 'query': query, 'headers':headers, 'res': entries, 'order': order_by}});
-          }
-        });
+        if (typeof(cursor) == 'object') {
+          query_result_object(cursor, queryName, query, fields_list, order_by, cb);
+        } else {
+          cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': ''}});
+        }
       });
     }
     catch (e) {
