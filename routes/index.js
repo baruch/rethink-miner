@@ -69,6 +69,14 @@ function prepare_table(fields_list, results) {
         d = unpack_object(result0, headers, fields, 'group');
         headers = d[0];
         fields = d[1];
+
+        // Put the reduction at the end
+        reduction_field = fields.indexOf('reduction');
+        reduced_field = fields.splice(reduction_field, 1);
+        reduced_header = headers.splice(reduction_field, 1);
+
+        fields.push(reduced_field[0]);
+        headers.push(reduced_header[0]);
       }
 
     }
