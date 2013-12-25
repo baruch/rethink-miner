@@ -11,7 +11,8 @@
     "express": "3.4.7",
     "jade": "*",
     "rethinkdb": "1.11.x",
-    "debug": "*"
+    "debug": "*",
+    "async": "*"
   },
   "repository": {
     "type": "git",

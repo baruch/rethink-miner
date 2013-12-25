@@ -1,0 +1,16 @@
+extends layout
+
+block content
+  h1= Tables
+  p Available Tables
+
+  table
+    each res in data
+      tr
+        td= res.name
+        td
+          table
+            each tableName in res.tables
+              tr
+                td
+                  a(href='/table/' + res.name + '/' + tableName)= tableName

@@ -1,6 +1,7 @@
 var r = require('rethinkdb'),
     debug = require('debug')('rdb'),
     csv = require('express-csv'),
+    async = require('async'),
     self = this;
 
 
@@ -37,9 +38,6 @@ function unpack_object(result, headers, fields, unpack_field) {
     });
     headers.push(field);
   });
-  console.log('unpack');
-  console.log(headers);
-  console.log(fields);
   return [headers, fields];
 }
 
@@ -86,7 +84,6 @@ function prepare_table(fields_list, results) {
       headers.push(field[1]);
     });
   }
-  console.log(headers);
   return [headers, fields];
 }
 
@@ -167,7 +164,6 @@ exports.q = function(req, res) {
 
         if (req.query.format == 'csv') {
           answer = [response.result.headers].concat(response.result.res);
-          console.log(answer);
           res.csv(answer);
         } else {
           res.render('query', response);
@@ -208,7 +204,6 @@ function addTest(req, res) {
         res.render('add', {name: name, query: query, msg: err});
       }
 
-      console.log(result); //TODO: remove debug print
       res.render('add', result);
     });
   } else {
@@ -225,6 +220,44 @@ exports.addSaveOrTest = function (req, res) {
     res.status(404);
     res.render('error', {title: 'Unknown action in add'});
   }
+}
+
+exports.tables = function (req, res) {
+  r.dbList().run(self.connection, function(err, result) {
+    if (err) {
+      return res.render('error', {title: 'Failed to get list of databases'});
+    }
+
+    async.map(result, function(dbName, cb) {
+      r.db(dbName).tableList().run(self.connection, function(err, result) {
+        if (err) {
+          return cb(err, null);
+        }
+        cb(null, {'name': dbName, 'tables': result});
+      });
+    },
+    function (err, results) {
+      if (err) {
+        return res.render('error', {title: 'Error while listing tables: ' + err});
+      }
+      res.render('tables', {'data': results});
+    });
+  });
+}
+
+exports.table = function (req, res) {
+  dbName = req.params.db;
+  tableName = req.params.table;
+
+  r.db(dbName).table(tableName).run(self.connection, function(err, cursor) {
+    if (err) {
+      return res.render('error', {title: 'Error while reading table ' + tableName + ' from db ' + dbName});
+    }
+    query_result_object(cursor, 'db ' + dbName + ' table ' + tableName, 'r.db(' + dbName + ').table(' + tableName + ')', null, null,
+        function(err, result) {
+          res.render('table', result);
+        });
+  });
 }
 
 function test_data() {
