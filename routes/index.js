@@ -164,6 +164,7 @@ exports.q = function(req, res) {
 
         if (req.query.format == 'csv') {
           answer = [response.result.headers].concat(response.result.res);
+          res.attachment(req.params.name + '.csv');
           res.csv(answer);
         } else {
           res.render('query', response);
