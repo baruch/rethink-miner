@@ -87,7 +87,7 @@ function prepare_table(fields_list, results) {
   return [headers, fields];
 }
 
-function query_result_object(cursor, queryName, query, fields_list, order_by, cb) {
+function query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, cb) {
   cursor.toArray(function(err, results) {
     if (err) {
       debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
@@ -108,12 +108,21 @@ function query_result_object(cursor, queryName, query, fields_list, order_by, cb
         });
         entries.push(entry);
       });
-      cb(null, {'result': {'name': queryName, 'query': query, 'headers':headers, 'res': entries, 'order': order_by}});
+      cb(null, {'result': {
+        'name': queryName,
+        'query': query,
+        'headers':headers,
+        'res': entries,
+        'order': order_by,
+        'page_num': page_num,
+        'page_size': page_size,
+        'last_page': last_page
+      }});
     }
   });
 }
 
-function doQuery(queryName, query, fields_list, order_by, cb) {
+function doQuery(queryName, query, fields_list, order_by, page_num, page_size, cb) {
     try {
       if (order_by && query) {
         query += ".orderBy('" + order_by + "')"
@@ -121,23 +130,42 @@ function doQuery(queryName, query, fields_list, order_by, cb) {
 
       q = eval(query);
 
-      q.run(self.connection, function(err, cursor) {
-        if (err) {
-          return cb(err, {title: 'Failed to run user query', description: err});
+      async.waterfall([
+        // Count entries in table
+        function (callback) {
+          q.count().run(self.connection, function(err, count) {
+            callback(err, count);
+          });
+        },
+        // Get the actual entries
+        function (count, callback) {
+          last_page = 1;
+          console.log({page_size: page_size, count: count});
+          if (count > page_size) {
+            last_page = Math.floor((count + page_size - 1)  / page_size) - 1;
+            if (!page_num) {
+              page_num = 0;
+            }
+            start_index = page_num * page_size;
+            console.log({last_page: last_page, page_num: page_num, start_index: start_index, page_size: page_size});
+            q = q.skip(start_index).limit(page_size);
+          }
+          q.run(self.connection, function(err, cursor) {
+            if (typeof(cursor) == 'object') {
+              query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, cb);
+            } else {
+              cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': '', 'page_num': page_num, 'page_size': page_size, 'last_page': last_page}});
+            }
+          });
         }
-        if (typeof(cursor) == 'object') {
-          query_result_object(cursor, queryName, query, fields_list, order_by, cb);
-        } else {
-          cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': ''}});
-        }
-      });
+      ]);
     }
     catch (e) {
       return cb(e, {title: 'Failed to run query', description: e.toString()})
     }
 }
 
-function doQueryByName(queryName, order_by, cb) {
+function doQueryByName(queryName, order_by, page_num, page_size, cb) {
   r.table('queries').get(queryName).run(self.connection, function(err, result) {
     if (err) {
       return cb(err, {title: 'Error querying database', description: err});
@@ -149,12 +177,12 @@ function doQueryByName(queryName, order_by, cb) {
     query = result.query;
     fields_list = result.fields;
 
-    doQuery(queryName, query, fields_list, order_by, cb);
+    doQuery(queryName, query, fields_list, order_by, page_num, page_size, cb);
   });
 }
 
 exports.q = function(req, res) {
-  doQueryByName(req.params.name, req.query.order,
+  doQueryByName(req.params.name, req.query.order, req.query.page_num, parseInt(req.query.page_size) || 100,
       function(err, response) {
         if (err) {
           res.status(500);
@@ -249,15 +277,11 @@ exports.tables = function (req, res) {
 exports.table = function (req, res) {
   dbName = req.params.db;
   tableName = req.params.table;
+  queryName = 'db ' + dbName + ' table ' + tableName;
+  query = 'r.db("' + dbName + '").table("' + tableName + '")';
 
-  r.db(dbName).table(tableName).run(self.connection, function(err, cursor) {
-    if (err) {
-      return res.render('error', {title: 'Error while reading table ' + tableName + ' from db ' + dbName});
-    }
-    query_result_object(cursor, 'db ' + dbName + ' table ' + tableName, 'r.db(' + dbName + ').table(' + tableName + ')', null, null,
-        function(err, result) {
-          res.render('table', result);
-        });
+  doQuery(queryName, query, null, req.query.order, parseInt(req.query.page_num) || 0, parseInt(req.query.page_size) || 100, function(err, result) {
+    res.render('table', result);
   });
 }
 
