@@ -12,7 +12,8 @@
     "jade": "*",
     "rethinkdb": "1.11.x",
     "debug": "*",
-    "async": "*"
+    "async": "*",
+    "forever": "*"
   },
   "repository": {
     "type": "git",
