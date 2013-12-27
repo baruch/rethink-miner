@@ -13,6 +13,7 @@ var rdb = require('rethinkdb');
 var app = express();
 
 // all environments
+app.set('adminpw', process.env.ADMIN_PW || 'admin');
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -29,8 +30,13 @@ if ('development' === app.get('env')) {
   app.use(express.errorHandler());
 }
 
+var requireAdmin = express.basicAuth(function(user, pass) {
+  return (user == 'admin' && pass == app.get('adminpw'));
+});
+
 app.get('/', routes.index);
 app.get('/q/:name', routes.q);
+app.all('/add', requireAdmin);
 app.get('/add', routes.addShow);
 app.post('/add', routes.addSaveOrTest);
 app.get('/tables', routes.tables);
