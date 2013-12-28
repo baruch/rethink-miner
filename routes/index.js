@@ -182,7 +182,15 @@ function doQueryByName(queryName, order_by, page_num, page_size, cb) {
 }
 
 exports.q = function(req, res) {
-  doQueryByName(req.params.name, req.query.order, req.query.page_num, parseInt(req.query.page_size) || 100,
+  page_size = parseInt(req.query.page_size) || 100;
+  page_num = parseInt(req.query.page_num);
+
+  if (req.query.format == 'csv') {
+    page_num = 0;
+    page_size = 1000000;
+  }
+
+  doQueryByName(req.params.name, req.query.order, page_num, page_size,
       function(err, response) {
         if (err) {
           res.status(500);
@@ -275,13 +283,28 @@ exports.tables = function (req, res) {
 }
 
 exports.table = function (req, res) {
+  page_size = parseInt(req.query.page_size) || 100;
+  page_num = parseInt(req.query.page_num) || 0;
+
+  if (req.query.format == 'csv') {
+    page_num = 0;
+    page_size = 1000000;
+  }
+
   dbName = req.params.db;
   tableName = req.params.table;
   queryName = 'db ' + dbName + ' table ' + tableName;
   query = 'r.db("' + dbName + '").table("' + tableName + '")';
 
-  doQuery(queryName, query, null, req.query.order, parseInt(req.query.page_num) || 0, parseInt(req.query.page_size) || 100, function(err, result) {
-    res.render('table', result);
+  doQuery(queryName, query, null, req.query.order, page_num, page_size, function(err, response) {
+    if (req.query.format == 'csv') {
+      answer = [response.result.headers].concat(response.result.res);
+      res.attachment(req.params.name + '.csv');
+      res.csv(answer);
+    } else {
+      res.render('query', response);
+    }
+    res.render('table', response);
   });
 }
 
