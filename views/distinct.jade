@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  script(src='/javascripts/sorttable.js').
+
+  table(class=['table-striped', 'table', 'sortable'])
+    thead
+      tr
+        th Key
+        th Count
+        th Distinct Values
+    tbody
+      each key in result
+        tr
+          td= key.key
+          td= key.count
+          td
+            each val in key.distincts
+              span "#{val}", 

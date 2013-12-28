@@ -7,15 +7,17 @@ block content
   table(class=['table-striped', 'table-bordered', 'table', 'sortable'])
     thead
       tr
-        td Database
-        td(width='70%') Tables
+        th Database
+        th(width='70%') Table
+        th Table Views
     tbody
       each res in data
         tr
-          td= res.name
-          td
-            table
-              each tableName in res.tables
-                tr
-                  td
-                    a(href='/table/' + res.name + '/' + tableName)= tableName
+          th(colspan="3")= res.name
+        each tableName in res.tables
+          tr
+            td
+            td
+              a(href='/table/' + res.name + '/' + tableName)= tableName
+            td
+              a(href='/table/' + res.name + '/' + tableName + '/distinct') distinct

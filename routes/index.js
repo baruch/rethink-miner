@@ -4,6 +4,17 @@ var r = require('rethinkdb'),
     async = require('async'),
     self = this;
 
+Array.prototype.getUnique = function() {
+  var u = {}, a = [];
+  for(var i = 0, l = this.length; i < l; ++i){
+    if(u.hasOwnProperty(this[i])) {
+      continue;
+    }
+    a.push(this[i]);
+    u[this[i]] = 1;
+  }
+  return a;
+}
 
 /*
  * GET home page.
@@ -305,6 +316,49 @@ exports.table = function (req, res) {
       res.render('query', response);
     }
     res.render('table', response);
+  });
+}
+
+exports.tableDistinct = function (req, res) {
+  page_size = 1000;
+  page_num = 0;
+
+  dbName = req.params.db;
+  tableName = req.params.table;
+  queryName = 'distinct values in db ' + dbName + ' table ' + tableName;
+
+  async.waterfall([
+    function(callback) {
+      r.db(dbName).table(tableName).map(function(i) { return i.keys()}).distinct().reduce(function(red, i) {return red.union(i)}).
+        run(self.connection, function (err, result) {
+          callback(null, result.getUnique());
+        });
+    },
+    function(keys, callback) {
+      async.map(keys, function (key, cb) {
+        r.db(dbName).table(tableName).withFields(key).distinct().count().run(self.connection, function (err, result) {
+          cb(err, {key: key, count: result});
+        });
+      }, function (err, results) {
+        callback(err, results);
+      });
+    },
+    function(keys, callback) {
+      async.map(keys, function(key, cb) {
+        r.db(dbName).table(tableName).withFields(key.key).distinct().sample(10).orderBy(key.key).run(self.connection, function(err, results) {
+          async.map(results, function(obj, rescb) {
+              rescb(null, obj[key.key]);
+            }, function (err, results) {
+              key.distincts = results;
+              cb(err, key);
+            });
+        });
+      }, function (err, results) {
+        callback(err, results);
+      });
+    }
+  ], function (err, result) {
+    res.render('distinct', {result: result});
   });
 }
 

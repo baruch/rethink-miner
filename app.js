@@ -41,6 +41,7 @@ app.get('/add', routes.addShow);
 app.post('/add', routes.addSaveOrTest);
 app.get('/tables', routes.tables);
 app.get('/table/:db/:table', routes.table);
+app.get('/table/:db/:table/distinct', routes.tableDistinct)
 
 var dbConfig = {
   host : process.env.RDB_HOST || 'localhost',
