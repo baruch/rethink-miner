@@ -245,8 +245,9 @@ function addSave(req, res) {
 function addTest(req, res) {
   name = req.body.name;
   query = req.body.query;
+
   if (name && query) {
-    doQuery('Testing ' + name, query, null, null, function(err, result) {
+    doQuery('Testing ' + name, query, null, null, 0, 100, function(err, result) {
       if (err) {
         // TODO: Need to output the error here
         res.render('add', {name: name, query: query, msg: err});
