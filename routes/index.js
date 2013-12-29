@@ -21,7 +21,7 @@ Array.prototype.getUnique = function() {
  */
 
 exports.index = function(req, res){
-  r.table('queries').run(self.connection, function(err, cursor) {
+  r.table('queries').orderBy('name').run(self.connection, function(err, cursor) {
     if (err) {
       debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
       res.status(500);
