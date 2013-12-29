@@ -150,7 +150,7 @@ function doQuery(queryName, query, fields_list, order_by, page_num, page_size, c
         },
         // Get the actual entries
         function (count, callback) {
-          last_page = 1;
+          last_page = 0;
           console.log({page_size: page_size, count: count});
           if (count > page_size) {
             last_page = Math.floor((count + page_size - 1)  / page_size) - 1;

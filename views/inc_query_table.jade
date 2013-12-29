@@ -24,6 +24,7 @@ if result.headers
       else
         tr
           td(colspan="#{headers.length}") no results
+
   ul.pagination
     if result.page_num == 0
       li.disabled
@@ -32,12 +33,13 @@ if result.headers
       li
         a(href='?page_num=0&page_size=' + result.page_size) &laquo;
 
-    - for(var i = result.page_num - 2; i <= result.page_num + 2; i++)
-      - if (i <= result.last_page && i >= 0)
-        li
-          a(href='?page_num=' + i + '&page_size=' + result.page_size)= i
+    if result.last_page > 0
+      - for(var i = result.page_num - 2; i <= result.page_num + 2; i++)
+        - if (i <= result.last_page && i >= 0)
+          li
+            a(href='?page_num=' + i + '&page_size=' + result.page_size)= i
 
-    if result.page_num === result.last_page
+    if result.page_num == result.last_page
       li.disabled
         a(href='#') &raquo;
     else
