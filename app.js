@@ -12,7 +12,10 @@ var rdb = require('rethinkdb');
 
 var app = express();
 
+pkg = require('./package.json');
+
 // all environments
+app.set('version', pkg.version);
 app.set('adminpw', process.env.ADMIN_PW || 'admin');
 app.set('port', process.env.PORT || 3000);
 app.set('views', path.join(__dirname, 'views'));

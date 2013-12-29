@@ -8,7 +8,7 @@ html
     style.
       body { padding-top: 70px; }
   body
-    div(role='navigation', class=['navbar', 'navbar-inverse', 'navbar-fixed-top'])
+    nav(role='navigation', class=['navbar', 'navbar-inverse', 'navbar-fixed-top'])
       div.container
         button(type='button', class='navbar-toggle', 'data-toggle'='collapse', 'data-target'='.navbar-collapse')
           span.sr-only Toggle navigation
@@ -24,6 +24,10 @@ html
               a(href='/add') Add
             li
               a(href='/tables') Tables
+
+          ul.nav.navbar-right
+            li
+              a(href='http://github.com/baruch/rethink-miner')= settings.version
     script(src='/javascripts/jquery-1.10.2.min.js')
     script(src='/javascripts/bootstrap.min.js')
     div.container
