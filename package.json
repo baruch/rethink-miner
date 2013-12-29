@@ -23,6 +23,7 @@
   "keywords": [
     "server",
     "rethinkdb",
-    "mining"
+    "mining",
+    "database"
   ]
 }
