@@ -54,12 +54,6 @@ var dbConfig = {
 
 module.exports = app;
 
-process.on('uncaughtException', function (err) {
-  console.log(err);
-  console.log(err.stack);
-  process.exit(1);
-});
-
 app.initDb = function (done) {
   // Using a single db connection for the app
   rdb.connect({host: dbConfig.host, port: dbConfig.port}, function(err, connection) {
