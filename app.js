@@ -57,6 +57,7 @@ module.exports = app;
 process.on('uncaughtException', function (err) {
   console.log(err);
   console.log(err.stack);
+  process.exit(1);
 });
 
 app.initDb = function (done) {
