@@ -9,6 +9,7 @@ var routes = require('./routes');
 var http = require('http');
 var path = require('path');
 var rdb = require('rethinkdb');
+var db = require('./lib/db');
 
 var app = express();
 
@@ -54,28 +55,9 @@ var dbConfig = {
 
 module.exports = app;
 
-app.initDb = function (done) {
-  // Using a single db connection for the app
-  rdb.connect({host: dbConfig.host, port: dbConfig.port}, function(err, connection) {
-    if(err) {
-      console.log("ERROR connecting to database: %s:%s", err.name, err.msg);
-      process.exit(1);
-    }
-    else {
-      routes.setupDB(connection, dbConfig.db);
-      // set up the default database for the connection
-      connection.use(dbConfig.db);
-      // set up the module global connection
-      routes.connection = connection;
-      app.set('db', connection);
-    }
-    done();
-  });
-}
-
 if (!module.parent) {
   // start serving requests
-  app.initDb(function() {
+  db.setup(dbConfig, function() {
     http.createServer(app).listen(app.get('port'), function(){
       console.log('Server listening on port ' + app.get('port'));
     });
