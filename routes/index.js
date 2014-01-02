@@ -168,10 +168,10 @@ function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_s
             q = q.skip(start_index).limit(page_size);
           }
           q.run(conn, function(err, cursor) {
-            callback(er, cursor);
+            callback(err, cursor);
           });
         }
-      ], function (err, result) {
+      ], function (err, cursor) {
         if (err) {
           console.log('error in waterfall');
           return cb(err, null);
