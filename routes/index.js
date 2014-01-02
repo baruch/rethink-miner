@@ -150,6 +150,7 @@ function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_s
         // Count entries in table
         function (callback) {
           q.count().run(conn, function(err, count) {
+            if (err) { console.log('error in counting'); }
             callback(err, count);
           });
         },
@@ -167,14 +168,20 @@ function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_s
             q = q.skip(start_index).limit(page_size);
           }
           q.run(conn, function(err, cursor) {
-            if (typeof(cursor) == 'object') {
-              query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, cb);
-            } else {
-              cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': '', 'page_num': page_num, 'page_size': page_size, 'last_page': last_page}});
-            }
+            callback(er, cursor);
           });
         }
-      ]);
+      ], function (err, result) {
+        if (err) {
+          console.log('error in waterfall');
+          return cb(err, null);
+        }
+        if (typeof(cursor) == 'object') {
+          query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, cb);
+        } else {
+          cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': '', 'page_num': page_num, 'page_size': page_size, 'last_page': last_page}});
+        }
+      });
     }
     catch (e) {
       return cb(e, {title: 'Failed to run query', description: e.toString()})
@@ -185,6 +192,7 @@ function doQueryByName(queryName, order_by, page_num, page_size, cb) {
   db.onConnect(function(err, conn, conncb) {
     r.table('queries').get(queryName).run(conn, function(err, result) {
       if (err) {
+        console.log('query "' + queryName + '" is missing');
         conncb();
         return cb(err, {title: 'Error querying database', description: err});
       }
@@ -197,8 +205,8 @@ function doQueryByName(queryName, order_by, page_num, page_size, cb) {
       fields_list = result.fields;
 
       doQuery(conn, queryName, query, fields_list, order_by, page_num, page_size, function(err, result) {
-        conncb()
         cb(err, result);
+        conncb();
       });
     });
   });
@@ -217,8 +225,7 @@ exports.q = function(req, res) {
       function(err, response) {
         if (err) {
           res.status(500);
-          res.render('error', response);
-          return;
+          return res.render('error', response);
         }
 
         if (req.query.format == 'csv') {
