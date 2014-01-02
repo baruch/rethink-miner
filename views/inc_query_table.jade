@@ -33,11 +33,16 @@ if result.headers
       li
         a(href='?page_num=0&page_size=' + result.page_size) &laquo;
 
-    if result.last_page > 0
-      - for(var i = result.page_num - 2; i <= result.page_num + 2; i++)
-        - if (i <= result.last_page && i >= 0)
-          li
-            a(href='?page_num=' + i + '&page_size=' + result.page_size)= i
+    - for(var i = result.page_num - 4; i < result.page_num; i++)
+      - if (i > 0)
+        li
+          a(href='?page_num=' + i + '&page_size=' + result.page_size)= i
+    li.active
+      a(href='?page_num=' + result.page_num + '&page_size=' + result.page_size)= result.page_num
+    - for(var i = result.page_num + 1; i <= result.page_num + 4; i++)
+      - if (i <= result.last_page)
+        li
+          a(href='?page_num=' + i + '&page_size=' + result.page_size)= i
 
     if result.page_num == result.last_page
       li.disabled
