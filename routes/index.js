@@ -103,7 +103,7 @@ function prepare_table(fields_list, results) {
   return [headers, fields];
 }
 
-function query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, cb) {
+function query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, count, cb) {
   cursor.toArray(function(err, results) {
     if (err) {
       debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
@@ -132,7 +132,8 @@ function query_result_object(cursor, queryName, query, fields_list, order_by, pa
         'order': order_by,
         'page_num': page_num,
         'page_size': page_size,
-        'last_page': last_page
+        'last_page': last_page,
+        'count': count
       }});
     }
   });
@@ -168,18 +169,18 @@ function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_s
             q = q.skip(start_index).limit(page_size);
           }
           q.run(conn, function(err, cursor) {
-            callback(err, cursor);
+            callback(err, last_page, count, cursor);
           });
         }
-      ], function (err, cursor) {
+      ], function (err, last_page, count, cursor) {
         if (err) {
           console.log('error in waterfall');
           return cb(err, null);
         }
         if (typeof(cursor) == 'object') {
-          query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, cb);
+          query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, count, cb);
         } else {
-          cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': '', 'page_num': page_num, 'page_size': page_size, 'last_page': last_page}});
+          cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': '', 'page_num': page_num, 'page_size': page_size, 'last_page': last_page, 'count': 1}});
         }
       });
     }
