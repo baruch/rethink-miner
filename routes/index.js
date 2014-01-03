@@ -46,165 +46,13 @@ exports.index = function(req, res) {
   });
 }
 
-function unpack_object(result, headers, fields, unpack_field) {
-  red = Object.keys(result[unpack_field]);
-  red.forEach(function(field) {
-    fields.push(function(f) {
-      return f[unpack_field][field];
-    });
-    headers.push(field);
-  });
-  return [headers, fields];
-}
-
-function prepare_table(fields_list, results) {
-  headers = [];
-  fields = [];
-  if (!fields_list) {
-    result0 = results[0]
-    fields = Object.keys(result0);
-    headers = Object.keys(result0);
-    if (fields.indexOf('reduction') != -1) {
-      if (typeof(result0['reduction']) == 'object') {
-        // This is a groupedMapReduce
-        reduction_field = fields.indexOf('reduction');
-        reduced_field = fields.splice(reduction_field, 1);
-        reduced_header = headers.splice(reduction_field, 1);
-
-        d = unpack_object(result0, headers, fields, 'reduction');
-        headers = d[0];
-        fields = d[1];
-      } else if (typeof(result0['group']) == 'object') {
-        // This is a groupBy
-        group_field = fields.indexOf('group');
-        grouped_field = fields.splice(group_field, 1);
-        grouped_header = headers.splice(group_field, 1);
-
-        d = unpack_object(result0, headers, fields, 'group');
-        headers = d[0];
-        fields = d[1];
-
-        // Put the reduction at the end
-        reduction_field = fields.indexOf('reduction');
-        reduced_field = fields.splice(reduction_field, 1);
-        reduced_header = headers.splice(reduction_field, 1);
-
-        fields.push(reduced_field[0]);
-        headers.push(reduced_header[0]);
-      }
-
-    }
-  } else {
-    fields_list.forEach(function(field) {
-      fields.push(field[0]);
-      headers.push(field[1]);
-    });
-  }
-  return [headers, fields];
-}
-
-function query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, count, cb) {
-  cursor.toArray(function(err, results) {
-    if (err) {
-      debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
-      return cb(err, {title: 'Failed to convert query to array', description:err});
-    } else {
-      d = prepare_table(fields_list, results);
-      headers = d[0];
-      fields = d[1];
-      entries = [];
-      results.forEach(function(res) {
-        entry = [];
-        fields.forEach(function(field) {
-          if (typeof field == "string") {
-            entry.push(res[field]);
-          } else {
-            entry.push(field(res));
-          }
-        });
-        entries.push(entry);
-      });
-      cb(null, {'result': {
-        'name': queryName,
-        'query': query,
-        'headers':headers,
-        'res': entries,
-        'order': order_by,
-        'page_num': page_num,
-        'page_size': page_size,
-        'last_page': last_page,
-        'count': count
-      }});
-    }
-  });
-}
-
-function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_size, cb) {
-    try {
-      if (order_by && query) {
-        query += ".orderBy('" + order_by + "')"
-      }
-
-      q = eval(query);
-
-      if (!page_num) {
-        page_num = 0;
-      }
-
-      async.waterfall([
-        // Count entries in table
-        function (callback) {
-          q.count().run(conn, function(err, count) {
-            if (err) { console.log('error in counting'); }
-            callback(err, count);
-          });
-        },
-        // Get the actual entries
-        function (count, callback) {
-          last_page = 0;
-          console.log({page_size: page_size, count: count});
-          if (count > page_size) {
-            last_page = Math.floor((count + page_size - 1)  / page_size) - 1;
-            start_index = page_num * page_size;
-            console.log({last_page: last_page, page_num: page_num, start_index: start_index, page_size: page_size});
-            q = q.skip(start_index).limit(page_size);
-          }
-          q.run(conn, function(err, cursor) {
-            callback(err, last_page, count, cursor);
-          });
-        }
-      ], function (err, last_page, count, cursor) {
-        if (err) {
-          console.log('error in waterfall');
-          return cb(err, null);
-        }
-        if (typeof(cursor) == 'object') {
-          query_result_object(cursor, queryName, query, fields_list, order_by, page_num, page_size, last_page, count, cb);
-        } else {
-          cb(null, {'result': {'name': queryName, 'query': query, 'headers':['result'], 'res': [[cursor]], 'order': '', 'page_num': page_num, 'page_size': page_size, 'last_page': last_page, 'count': 1}});
-        }
-      });
-    }
-    catch (e) {
-      return cb(e, {title: 'Failed to run query', description: e.toString()})
-    }
-}
-
 function doQueryByName(queryName, order_by, page_num, page_size, cb) {
   queries.namedQuery(queryName, function (err, q) {
     if (err) {
       return cb(err, null);
     }
 
-    db.onConnect(function (err, conn, conncb)  {
-      if (err) {
-        return cb(err, null);
-      }
-      doQuery(conn, query.name, query.query, query.fields, order_by, page_num, page_size, function(err, result) {
-        cb(err, result);
-        conncb();
-      });
-    });
+    q.pageData(page_num, page_size, order_by, cb);
   });
 }
 
@@ -265,8 +113,11 @@ function addTest(req, res) {
   query = req.body.query;
 
   if (name && query) {
-    db.onConnect(function (err, conn, conncb) {
-      doQuery(conn, 'Testing ' + name, query, null, null, 0, 100, function(err, result) {
+    queries.namedQueryNew(name, query, req.body.fields, function(err, q) {
+      if (err) {
+        return res.render('error', {title: 'Failed creating a new named query', err: err});
+      }
+      q.pageData(0, 100, null, function(err, result) {
         if (err) {
           // TODO: Need to output the error here
           res.render('add', {name: name, query: query, msg: err});
@@ -331,12 +182,13 @@ exports.table = function (req, res) {
 
   dbName = req.params.db;
   tableName = req.params.table;
-  queryName = 'db ' + dbName + ' table ' + tableName;
-  query = 'r.db("' + dbName + '").table("' + tableName + '")';
 
-  db.onConnect(function (err, conn, conncb) {
-    doQuery(conn, queryName, query, null, req.query.order, page_num, page_size, function(err, response) {
-      conncb();
+  queries.tableQuery(dbName, tableName, function (err, q) {
+    if (err) {
+      return res.render('error', {title: 'Error in table query', err: err});
+    }
+
+    query.pageData(page_num, page_size, req.query.order, function(err, response) {
       if (req.query.format == 'csv') {
         answer = [response.result.headers].concat(response.result.res);
         res.attachment(req.params.name + '.csv');
