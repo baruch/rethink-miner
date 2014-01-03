@@ -3,7 +3,7 @@ var r = require('rethinkdb'),
     csv = require('express-csv'),
     async = require('async'),
     db = require('../lib/db'),
-    self = this;
+    queries = require('../lib/query');
 
 Array.prototype.getUnique = function() {
   var u = {}, a = [];
@@ -28,7 +28,7 @@ exports.index = function(req, res) {
         conncb();
         debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
         res.status(500);
-        res.render('error', {title: 'Error querying db', description:err});
+        res.render('error', {title: 'Error querying db', err: err});
         return;
       }
       cursor.toArray(function(err, results) {
@@ -36,7 +36,7 @@ exports.index = function(req, res) {
         if(err) {
           debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
           res.status(500);
-          res.render('error', {title: 'No results', description: err});
+          res.render('error', {title: 'No results', err: err});
         }
         else{
           res.render('index', {title: 'Known Queries', res: results});
@@ -191,22 +191,16 @@ function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_s
 }
 
 function doQueryByName(queryName, order_by, page_num, page_size, cb) {
-  db.onConnect(function(err, conn, conncb) {
-    r.table('queries').get(queryName).run(conn, function(err, result) {
-      if (err) {
-        console.log('query "' + queryName + '" is missing');
-        conncb();
-        return cb(err, {title: 'Error querying database', description: err});
-      }
-      if (result === null) {
-        conncb();
-        s = 'No results found for query "' + queryName + '"';
-        return cb(new Error(s), {title: s});
-      }
-      query = result.query;
-      fields_list = result.fields;
+  queries.namedQuery(queryName, function (err, q) {
+    if (err) {
+      return cb(err, null);
+    }
 
-      doQuery(conn, queryName, query, fields_list, order_by, page_num, page_size, function(err, result) {
+    db.onConnect(function (err, conn, conncb)  {
+      if (err) {
+        return cb(err, null);
+      }
+      doQuery(conn, query.name, query.query, query.fields, order_by, page_num, page_size, function(err, result) {
         cb(err, result);
         conncb();
       });
@@ -227,7 +221,7 @@ exports.q = function(req, res) {
       function(err, response) {
         if (err) {
           res.status(500);
-          return res.render('error', response);
+          return res.render('error', {title: 'Failed to perform get by named query', err: err});
         }
 
         if (req.query.format == 'csv') {
@@ -293,7 +287,7 @@ exports.addSaveOrTest = function (req, res) {
     return addTest(req, res);
   } else {
     res.status(404);
-    res.render('error', {title: 'Unknown action in add'});
+    res.render('error', {title: 'Unknown action in add', description: 'got action "' + req.body.action + '"'});
   }
 }
 
@@ -302,7 +296,7 @@ exports.tables = function (req, res) {
     r.dbList().run(conn, function(err, result) {
       conncb();
       if (err) {
-        return res.render('error', {title: 'Failed to get list of databases'});
+        return res.render('error', {title: 'Failed to get list of databases', err: err});
       }
 
       async.map(result, function(dbName, cb) {
@@ -318,7 +312,7 @@ exports.tables = function (req, res) {
       },
       function (err, results) {
         if (err) {
-          return res.render('error', {title: 'Error while listing tables: ' + err});
+          return res.render('error', {title: 'Error while listing tables', err: err});
         }
         res.render('tables', {'data': results});
       });

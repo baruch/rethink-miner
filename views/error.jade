@@ -2,4 +2,10 @@ extends layout
 
 block content
   h1= 'Error: ' + title
-  p= description
+  if err.title
+    h2= err.title
+  pre= err.message
+  if err.stack
+    pre= err.stack
+  else
+    p No stack trace available.
