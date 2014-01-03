@@ -46,42 +46,63 @@ exports.index = function(req, res) {
   });
 }
 
-function doQueryByName(queryName, order_by, page_num, page_size, cb) {
-  queries.namedQuery(queryName, function (err, q) {
+function queryParams(req) {
+  params = {};
+
+  if (req === null) {
+    // No user supplied params, just defaults
+    params.page_num = 0;
+    params.page_size = 100;
+    params.is_csv = false;
+    params.order_by = null;
+  } else {
+    // Use user supplied params
+    if (req.query.format == 'csv') {
+      // Override params for CSV, just get everything out
+      params.page_num = 0;
+      params.page_size = 1000000;
+      params.is_csv = true;
+    } else {
+      params.page_size = parseInt(req.query.page_size) || 100;
+      params.page_num = parseInt(req.query.page_num) || 0;
+      params.is_csv = false;
+    }
+    params.order_by = req.query.order;
+  }
+
+  return params;
+}
+
+function displayTable(err, q, params, res) {
+  if (err) {
+    return res.render('error', {title: 'Failed to get query setup', err: err});
+  }
+  q.pageData(params, function (err, response) {
     if (err) {
-      return cb(err, null);
+      res.status(500);
+      return res.render('error', {title: 'Failed to get data to display table', err: err});
     }
 
-    q.pageData(page_num, page_size, order_by, cb);
+    if (params.is_csv) {
+      answer = [response.result.headers].concat(response.result.res);
+      res.attachment(req.params.name + '.csv');
+      res.csv(answer);
+    } else {
+      res.render('query', response);
+    }
   });
 }
 
-exports.q = function(req, res) {
-  page_size = parseInt(req.query.page_size) || 100;
-  page_num = parseInt(req.query.page_num);
-
-  if (req.query.format == 'csv') {
-    page_num = 0;
-    page_size = 1000000;
+function callbackDisplayTable(params, res) {
+  return function(err, q) {
+    displayTable(err, q, params, res);
   }
+}
 
-  doQueryByName(req.params.name, req.query.order, page_num, page_size,
-      function(err, response) {
-        if (err) {
-          res.status(500);
-          return res.render('error', {title: 'Failed to perform get by named query', err: err});
-        }
-
-        if (req.query.format == 'csv') {
-          answer = [response.result.headers].concat(response.result.res);
-          res.attachment(req.params.name + '.csv');
-          res.csv(answer);
-        } else {
-          res.render('query', response);
-        }
-      }
-  );
-};
+exports.q = function(req, res) {
+  params = queryParams(req);
+  queries.namedQuery(req.params.name, callbackDisplayTable(params, res));
+}
 
 exports.addShow = function (req, res) {
   res.render('add', null);
@@ -117,7 +138,9 @@ function addTest(req, res) {
       if (err) {
         return res.render('error', {title: 'Failed creating a new named query', err: err});
       }
-      q.pageData(0, 100, null, function(err, result) {
+
+      params = queryParams(null);
+      q.pageData(params, function(err, result) {
         if (err) {
           // TODO: Need to output the error here
           res.render('add', {name: name, query: query, msg: err});
@@ -172,33 +195,12 @@ exports.tables = function (req, res) {
 }
 
 exports.table = function (req, res) {
-  page_size = parseInt(req.query.page_size) || 100;
-  page_num = parseInt(req.query.page_num) || 0;
-
-  if (req.query.format == 'csv') {
-    page_num = 0;
-    page_size = 1000000;
-  }
+  params = queryParams(req);
 
   dbName = req.params.db;
   tableName = req.params.table;
 
-  queries.tableQuery(dbName, tableName, function (err, q) {
-    if (err) {
-      return res.render('error', {title: 'Error in table query', err: err});
-    }
-
-    query.pageData(page_num, page_size, req.query.order, function(err, response) {
-      if (req.query.format == 'csv') {
-        answer = [response.result.headers].concat(response.result.res);
-        res.attachment(req.params.name + '.csv');
-        res.csv(answer);
-      } else {
-        res.render('query', response);
-      }
-      res.render('table', response);
-    });
-  });
+  queries.tableQuery(dbName, tableName, callbackDisplayTable(params, res));
 }
 
 exports.tableDistinct = function (req, res) {
