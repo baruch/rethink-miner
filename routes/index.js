@@ -22,27 +22,12 @@ Array.prototype.getUnique = function() {
  */
 
 exports.index = function(req, res) {
-  db.onConnect(function (err, conn, conncb) {
-    r.table('queries').orderBy('name').run(conn, function(err, cursor) {
-      if (err) {
-        conncb();
-        debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
-        res.status(500);
-        res.render('error', {title: 'Error querying db', err: err});
-        return;
-      }
-      cursor.toArray(function(err, results) {
-        conncb();
-        if(err) {
-          debug("[ERROR] %s:%s\n%s", err.name, err.msg, err.message);
-          res.status(500);
-          res.render('error', {title: 'No results', err: err});
-        }
-        else{
-          res.render('index', {title: 'Known Queries', res: results});
-        }
-      });
-    });
+  queries.queriesList(function (err, results) {
+    if (err) {
+      res.status(500);
+      return res.render('error', {title: 'Failed to list known queries', err: err});
+    }
+    res.render('index', {title: 'Known Queries', res: results});
   });
 }
 
