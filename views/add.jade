@@ -3,7 +3,7 @@ extends layout
 block content
   h1 Add Query
   if msg
-    div= msg
+    div Message: #{msg}
   div
     form(action='/add',method='post',role='form').form-horizontal
       div.form-group

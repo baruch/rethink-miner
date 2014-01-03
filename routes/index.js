@@ -3,7 +3,8 @@ var r = require('rethinkdb'),
     csv = require('express-csv'),
     async = require('async'),
     db = require('../lib/db'),
-    queries = require('../lib/query');
+    queries = require('../lib/query'),
+    Q = require('q');
 
 Array.prototype.getUnique = function() {
   var u = {}, a = [];
@@ -90,60 +91,58 @@ exports.q = function(req, res) {
 }
 
 exports.addShow = function (req, res) {
-  res.render('add', null);
+  res.render('add', {result: {name: ''}});
 }
 
-function addSave(req, res) {
-  name = req.body.name;
-  query = req.body.query;
-  if (name && query) {
-    db.onConnect(function(err, conn, conncb) {
-      r.table('queries').insert({name: name, query: query}).run(conn, function(err, result) {
-        conncb();
-        if (err) {
-          return res.render('add', {name: name, query: query, msg: 'Save failed with error: ' + err});
-        } else if (result.inserted > 0) {
-          return res.render('add', {name: name, query: query, msg: 'Saved'});
-        } else {
-          return res.render('add', {name: name, query: query, msg: 'Failed to save for: ' + result.first_error});
-        }
-      });
-    });
-  } else {
-    return res.render('add', {name: name, query: query, msg: 'fields failed validation'});
-  }
+function addSave(name, query, fields, res) {
+  Q.nfcall(queries.namedQueryNew, name, query, fields)
+  .then(function (q) {
+    return Q.ninvoke(q, "save");
+  }).then(function(result) {
+    msg = 'Saved';
+    if (result.inserted == 0) {
+      msg = 'Failed to save for:' + result.first_error;
+    }
+
+    return res.render('add', {name: name, query: query, fields: fields, msg: msg});
+  }).fail(function(err) {
+    res.render('add', {name: name, query: query, fields: fields, msg: 'Error while saving:' + err})
+  })
+  .done();
 }
 
-function addTest(req, res) {
-  name = req.body.name;
-  query = req.body.query;
-
-  if (name && query) {
-    queries.namedQueryNew(name, query, req.body.fields, function(err, q) {
-      if (err) {
-        return res.render('error', {title: 'Failed creating a new named query', err: err});
-      }
-
-      params = queryParams(null);
-      q.pageData(params, function(err, result) {
-        if (err) {
-          // TODO: Need to output the error here
-          res.render('add', {name: name, query: query, msg: err});
-        }
-
-        res.render('add', result);
-      });
-    });
-  } else {
-    res.render('add', {name: name, query: query, msg: 'Fields failed validation'});
-  }
+function addTest(name, query, fields, res) {
+  Q.nfcall(queries.namedQueryNew, name, query, fields)
+  .then(function (q) {
+    params = queryParams(null);
+    return Q.ninvoke(q, 'pageData', params);
+  })
+  .then(function (result) {
+    console.log('pass ok');
+    result.name = name;
+    result.query = query;
+    result.fields = fields;
+    return res.render('add', result);
+  }, function (err) {
+    console.log('pass fail');
+    return res.render('add', {name: name, query: query, msg: err.message});
+  })
+  .fail(function (err) {
+    console.log('failed');
+    return res.render('error', {title: 'Failed creating a new named query', err: err});
+  })
+  .done();
 }
 
 exports.addSaveOrTest = function (req, res) {
+  name = req.body.name;
+  query = req.body.query;
+  fields = req.body.fields;
+
   if (req.body.action == 'Save') {
-    return addSave(req, res);
+    return addSave(name, query, fields, res);
   } else if (req.body.action == 'Test') {
-    return addTest(req, res);
+    return addTest(name, query, fields, res);
   } else {
     res.status(404);
     res.render('error', {title: 'Unknown action in add', description: 'got action "' + req.body.action + '"'});

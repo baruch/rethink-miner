@@ -14,7 +14,8 @@
     "debug": "0.7.4",
     "async": "0.2.9",
     "forever": "0.10.11",
-    "extreme-csv": "0.6.x"
+    "extreme-csv": "0.6.x",
+    "q": "0.9.7"
   },
   "repository": {
     "type": "git",
