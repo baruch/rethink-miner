@@ -147,6 +147,10 @@ function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_s
 
       q = eval(query);
 
+      if (!page_num) {
+        page_num = 0;
+      }
+
       async.waterfall([
         // Count entries in table
         function (callback) {
@@ -161,9 +165,6 @@ function doQuery(conn, queryName, query, fields_list, order_by, page_num, page_s
           console.log({page_size: page_size, count: count});
           if (count > page_size) {
             last_page = Math.floor((count + page_size - 1)  / page_size) - 1;
-            if (!page_num) {
-              page_num = 0;
-            }
             start_index = page_num * page_size;
             console.log({last_page: last_page, page_num: page_num, start_index: start_index, page_size: page_size});
             q = q.skip(start_index).limit(page_size);
