@@ -41,6 +41,7 @@ function queryParams(req) {
     params.page_size = 100;
     params.is_csv = false;
     params.order_by = null;
+    params.force_uptodate = false;
   } else {
     // Use user supplied params
     if (req.query.format == 'csv') {
@@ -54,6 +55,7 @@ function queryParams(req) {
       params.is_csv = false;
     }
     params.order_by = req.query.order;
+    params.force_uptodate = req.query.uptodate || false;
   }
 
   return params;
