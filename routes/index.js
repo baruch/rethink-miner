@@ -32,6 +32,27 @@ exports.index = function(req, res) {
   });
 }
 
+function displayTableHtml(res, params, response) {
+  res.render('query', response);
+}
+
+function displayTableMethod(res, params, response, method, suffix) {
+  answer = [response.result.headers].concat(response.result.res);
+  res.attachment(params.name + '.' + suffix);
+  method.call(res, answer);
+}
+
+function displayTableCsv(res, params, response) {
+  displayTableMethod(res, params, response, res.csv, 'csv');
+}
+
+function displayTableJsonp(res, params, response) {
+  //displayTableMethod(res, params, response, res.jsonp, 'jsonp');
+  answer = [response.result.headers].concat(response.result.res);
+  res.attachment(params.name + '.jsonp');
+  res.jsonp(answer);
+}
+
 function queryParams(req) {
   params = {};
 
@@ -39,23 +60,29 @@ function queryParams(req) {
     // No user supplied params, just defaults
     params.page_num = 0;
     params.page_size = 100;
-    params.is_csv = false;
+    params.display = displayTableHtml;
     params.order_by = null;
     params.force_uptodate = false;
+    params.name = 'unknown';
   } else {
     // Use user supplied params
     if (req.query.format == 'csv') {
       // Override params for CSV, just get everything out
       params.page_num = 0;
       params.page_size = 1000000;
-      params.is_csv = true;
+      params.display = displayTableCsv;
+    } else if (req.query.jsonp == 'jsonp') {
+      params.page_num = 0;
+      params.page_size = 1000000;
+      params.display = displayTableJsonp;
     } else {
       params.page_size = parseInt(req.query.page_size) || 100;
       params.page_num = parseInt(req.query.page_num) || 0;
-      params.is_csv = false;
+      params.display = displayTableHtml;
     }
     params.order_by = req.query.order;
     params.force_uptodate = req.query.uptodate || false;
+    params.name = req.params.name;
   }
 
   return params;
@@ -71,13 +98,7 @@ function displayTable(err, q, params, res) {
       return res.render('error', {title: 'Failed to get data to display table', err: err});
     }
 
-    if (params.is_csv) {
-      answer = [response.result.headers].concat(response.result.res);
-      res.attachment(req.params.name + '.csv');
-      res.csv(answer);
-    } else {
-      res.render('query', response);
-    }
+    params.display(res, params, response);
   });
 }
 
@@ -199,6 +220,7 @@ exports.tableDistinct = function (req, res) {
 
   async.waterfall([
     function(callback) {
+      // Get table headers
       db.onConnect(function (err, conn, conncb) {
         r.db(dbName).table(tableName).map(function(i) { return i.keys()}).distinct().reduce(function(red, i) {return red.union(i)}).
           run(conn, function (err, result) {
@@ -208,6 +230,7 @@ exports.tableDistinct = function (req, res) {
       });
     },
     function(keys, callback) {
+      // Count number of values for each header
       async.map(keys, function (key, cb) {
         db.onConnect(function (err, conn, conncb) {
           r.db(dbName).table(tableName).withFields(key).distinct().count().run(conn, function (err, result) {
@@ -220,6 +243,7 @@ exports.tableDistinct = function (req, res) {
       });
     },
     function(keys, callback) {
+      // Get a sample of values for each header
       async.map(keys, function(key, cb) {
         db.onConnect(function (err, conn, conncb) {
           r.db(dbName).table(tableName).withFields(key.key).distinct().sample(10).orderBy(key.key).run(conn, function(err, results) {
