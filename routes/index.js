@@ -47,10 +47,7 @@ function displayTableCsv(res, params, response) {
 }
 
 function displayTableJsonp(res, params, response) {
-  //displayTableMethod(res, params, response, res.jsonp, 'jsonp');
-  answer = [response.result.headers].concat(response.result.res);
-  res.attachment(params.name + '.jsonp');
-  res.jsonp(answer);
+  displayTableMethod(res, params, response, res.jsonp, 'jsonp');
 }
 
 function queryParams(req) {
