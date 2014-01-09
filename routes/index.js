@@ -86,28 +86,29 @@ function queryParams(req) {
   return params;
 }
 
-function displayTable(err, q, params, res) {
-  if (err) {
-    return res.render('error', {title: 'Failed to get query setup', err: err});
-  }
-  q.pageData(params)
-  .done(function (response) {
-    params.display(res, params, response);
-  }, function(err) {
-    res.status(500);
-    return res.render('error', {title: 'Failed to get data to display table', err: err});
-  });
-}
-
-function callbackDisplayTable(params, res) {
-  return function(err, q) {
-    displayTable(err, q, params, res);
-  }
+function displayTable(query, params, res) {
+  query
+    .then(function (q) {
+      return q.pageData(params);
+    })
+    .catch(function (err) {
+      res.status(500);
+      return res.render('error', {title: 'Failed to get query setup', err: err});
+    })
+    .then(function (response) {
+      params.display(res, params, response);
+    })
+    .catch(function (err) {
+      res.status(500);
+      return res.render('error', {title: 'Failed to get data to display table', err: err});
+    })
+    .done();
 }
 
 exports.q = function(req, res) {
   params = queryParams(req);
-  queries.namedQuery(req.params.name, callbackDisplayTable(params, res));
+  query = queries.namedQuery(req.params.name);
+  displayTable(query, params, res);
 }
 
 exports.addShow = function (req, res) {
@@ -137,17 +138,14 @@ function addTest(name, query, fields, res) {
     return Q.ninvoke(q, 'pageData', params);
   })
   .then(function (result) {
-    console.log('pass ok');
     result.name = name;
     result.query = query;
     result.fields = fields;
     return res.render('add', result);
   }, function (err) {
-    console.log('pass fail');
     return res.render('add', {name: name, query: query, msg: err.message});
   })
   .fail(function (err) {
-    console.log('failed');
     return res.render('error', {title: 'Failed creating a new named query', err: err});
   })
   .done();
@@ -171,7 +169,6 @@ exports.addSaveOrTest = function (req, res) {
 exports.tables = function (req, res) {
   queries.tableList()
   .then(function (results) {
-    console.log(results);
     res.render('tables', {'data': results});
   })
   .catch(function (err) {
@@ -185,8 +182,9 @@ exports.table = function (req, res) {
 
   dbName = req.params.db;
   tableName = req.params.table;
+  query = queries.tableQuery(dbName, tableName);
 
-  queries.tableQuery(dbName, tableName, callbackDisplayTable(params, res));
+  displayTable(query, params, res);
 }
 
 exports.tableDistinct = function (req, res) {
