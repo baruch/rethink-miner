@@ -3,8 +3,7 @@ var r = require('rethinkdb'),
     csv = require('express-csv'),
     async = require('async'),
     db = require('../lib/db'),
-    queries = require('../lib/query'),
-    when = require('when');
+    queries = require('../lib/query');
 
 Array.prototype.getUnique = function() {
   var u = {}, a = [];
