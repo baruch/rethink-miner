@@ -167,32 +167,15 @@ exports.addSaveOrTest = function (req, res) {
 }
 
 exports.tables = function (req, res) {
-  db.onConnect(function (err, conn, conncb) {
-    r.dbList().run(conn, function(err, result) {
-      conncb();
-      if (err) {
-        return res.render('error', {title: 'Failed to get list of databases', err: err});
-      }
-
-      async.map(result, function(dbName, cb) {
-        db.onConnect(function (err, conn, conncb) {
-          r.db(dbName).tableList().run(conn, function(err, result) {
-            conncb();
-            if (err) {
-              return cb(err, null);
-            }
-            cb(null, {'name': dbName, 'tables': result});
-          });
-        });
-      },
-      function (err, results) {
-        if (err) {
-          return res.render('error', {title: 'Error while listing tables', err: err});
-        }
-        res.render('tables', {'data': results});
-      });
-    });
-  });
+  queries.tableList()
+  .then(function (results) {
+    console.log(results);
+    res.render('tables', {'data': results});
+  })
+  .catch(function (err) {
+    res.render('error', {title: 'Error while listing tables', err: err});
+  })
+  .done();
 }
 
 exports.table = function (req, res) {
