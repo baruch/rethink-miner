@@ -195,49 +195,12 @@ exports.tableDistinct = function (req, res) {
   tableName = req.params.table;
   queryName = 'distinct values in db ' + dbName + ' table ' + tableName;
 
-  async.waterfall([
-    function(callback) {
-      // Get table headers
-      db.onConnect(function (err, conn, conncb) {
-        r.db(dbName).table(tableName).map(function(i) { return i.keys()}).distinct().reduce(function(red, i) {return red.union(i)}).
-          run(conn, function (err, result) {
-            conncb();
-            callback(null, result.getUnique());
-          });
-      });
-    },
-    function(keys, callback) {
-      // Count number of values for each header
-      async.map(keys, function (key, cb) {
-        db.onConnect(function (err, conn, conncb) {
-          r.db(dbName).table(tableName).withFields(key).distinct().count().run(conn, function (err, result) {
-            conncb();
-            cb(err, {key: key, count: result});
-          });
-        });
-      }, function (err, results) {
-        callback(err, results);
-      });
-    },
-    function(keys, callback) {
-      // Get a sample of values for each header
-      async.map(keys, function(key, cb) {
-        db.onConnect(function (err, conn, conncb) {
-          r.db(dbName).table(tableName).withFields(key.key).distinct().sample(10).orderBy(key.key).run(conn, function(err, results) {
-            async.map(results, function(obj, rescb) {
-                rescb(null, obj[key.key]);
-              }, function (err, results) {
-                key.distincts = results;
-                cb(err, key);
-            });
-            conncb();
-          });
-        });
-      }, function (err, results) {
-        callback(err, results);
-      });
-    }
-  ], function (err, result) {
-    res.render('distinct', {result: result});
-  });
+  queries.tableQuery(dbName, tableName)
+    .then(function (query) {
+      return query.distincts();
+    })
+    .then(function (result) {
+      res.render('distinct', {result: result});
+    })
+    .done();
 }
