@@ -22,13 +22,15 @@ Array.prototype.getUnique = function() {
  */
 
 exports.index = function(req, res) {
-  queries.queriesList(function (err, results) {
-    if (err) {
+  queries.queriesList()
+    .then(function (results) {
+      res.render('index', {title: 'Known Queries', res: results});
+    })
+    .catch(function (err) {
       res.status(500);
       return res.render('error', {title: 'Failed to list known queries', err: err});
-    }
-    res.render('index', {title: 'Known Queries', res: results});
-  });
+    })
+    .done();
 }
 
 function displayTableHtml(res, params, response) {
