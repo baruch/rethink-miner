@@ -4,7 +4,7 @@ var r = require('rethinkdb'),
     async = require('async'),
     db = require('../lib/db'),
     queries = require('../lib/query'),
-    Q = require('q');
+    when = require('when');
 
 Array.prototype.getUnique = function() {
   var u = {}, a = [];
@@ -89,13 +89,12 @@ function displayTable(err, q, params, res) {
   if (err) {
     return res.render('error', {title: 'Failed to get query setup', err: err});
   }
-  q.pageData(params, function (err, response) {
-    if (err) {
-      res.status(500);
-      return res.render('error', {title: 'Failed to get data to display table', err: err});
-    }
-
+  q.pageData(params)
+  .done(function (response) {
     params.display(res, params, response);
+  }, function(err) {
+    res.status(500);
+    return res.render('error', {title: 'Failed to get data to display table', err: err});
   });
 }
 
@@ -115,24 +114,23 @@ exports.addShow = function (req, res) {
 }
 
 function addSave(name, query, fields, res) {
-  Q.nfcall(queries.namedQueryNew, name, query, fields)
+  queries.namedQueryNew(name, query, fields)
   .then(function (q) {
     return Q.ninvoke(q, "save");
-  }).then(function(result) {
+  }).done(function(result) {
     msg = 'Saved';
     if (result.inserted == 0) {
       msg = 'Failed to save for:' + result.first_error;
     }
 
     return res.render('add', {name: name, query: query, fields: fields, msg: msg});
-  }).fail(function(err) {
+  }, function(err) {
     res.render('add', {name: name, query: query, fields: fields, msg: 'Error while saving:' + err})
-  })
-  .done();
+  });
 }
 
 function addTest(name, query, fields, res) {
-  Q.nfcall(queries.namedQueryNew, name, query, fields)
+  queries(namedQueryNew, name, query, fields)
   .then(function (q) {
     params = queryParams(null);
     return Q.ninvoke(q, 'pageData', params);
