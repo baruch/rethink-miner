@@ -5,9 +5,18 @@ block content
   p Welcome to #{title}
   ul
     if res.length > 0
-      each val in res
-        li
-          a(href='/q/' + val.name)= val.name
+      table(class=['table-striped', 'table-bordered', 'table', 'sortable'])
+        thead
+          tr
+            th(width='70%') Query
+            th Views
+        tbody
+          each val in res
+            tr
+              td
+                a(href='/q/' + val.name)= val.name
+              td
+                a(href='/q/' + val.name + '/distinct') Distinct Values
     else
       p No queries setup yet
   p

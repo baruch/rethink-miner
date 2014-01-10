@@ -40,6 +40,7 @@ var requireAdmin = express.basicAuth(function(user, pass) {
 
 app.get('/', routes.index);
 app.get('/q/:name', routes.q);
+app.get('/q/:name/distinct', routes.queryDistinct);
 app.all('/add', requireAdmin);
 app.get('/add', routes.addShow);
 app.post('/add', routes.addSaveOrTest);

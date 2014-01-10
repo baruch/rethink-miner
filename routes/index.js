@@ -202,5 +202,23 @@ exports.tableDistinct = function (req, res) {
     .then(function (result) {
       res.render('distinct', {result: result});
     })
+    .catch(function (err) {
+      res.render('error', {title: 'Error while getting table distinct values', err: err});
+    })
     .done();
+}
+
+exports.queryDistinct = function (req, res) {
+  params = queryParams(null);
+  query = queries.namedQuery(req.params.name);
+  query.then(function (query) {
+    return query.distincts();
+  })
+  .then(function (result) {
+    res.render('distinct', {result: result});
+  })
+  .catch(function (err) {
+    res.render('error', {title: 'Error while getting query distinct values', err: err});
+  })
+  .done();
 }
