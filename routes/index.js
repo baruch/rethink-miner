@@ -118,7 +118,7 @@ exports.addShow = function (req, res) {
 function addSave(name, query, fields, res) {
   queries.namedQueryNew(name, query, fields)
   .then(function (q) {
-    return Q.ninvoke(q, "save");
+    return q.save();
   }).done(function(result) {
     msg = 'Saved';
     if (result.inserted == 0) {
@@ -132,10 +132,10 @@ function addSave(name, query, fields, res) {
 }
 
 function addTest(name, query, fields, res) {
-  queries(namedQueryNew, name, query, fields)
+  queries.namedQueryNew(name, query, fields)
   .then(function (q) {
     params = queryParams(null);
-    return Q.ninvoke(q, 'pageData', params);
+    return q.pageData(params);
   })
   .then(function (result) {
     result.name = name;
@@ -145,7 +145,7 @@ function addTest(name, query, fields, res) {
   }, function (err) {
     return res.render('add', {name: name, query: query, msg: err.message});
   })
-  .fail(function (err) {
+  .catch(function (err) {
     return res.render('error', {title: 'Failed creating a new named query', err: err});
   })
   .done();
