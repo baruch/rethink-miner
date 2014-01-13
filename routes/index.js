@@ -187,15 +187,8 @@ exports.table = function (req, res) {
   displayTable(query, params, res);
 }
 
-exports.tableDistinct = function (req, res) {
-  page_size = 1000;
-  page_num = 0;
-
-  dbName = req.params.db;
-  tableName = req.params.table;
-  queryName = 'distinct values in db ' + dbName + ' table ' + tableName;
-
-  queries.tableQuery(dbName, tableName)
+function distinct(q, res) {
+  q
     .then(function (query) {
       return query.distincts();
     })
@@ -203,22 +196,19 @@ exports.tableDistinct = function (req, res) {
       res.render('distinct', {result: result});
     })
     .catch(function (err) {
-      res.render('error', {title: 'Error while getting table distinct values', err: err});
+      res.render('error', {title: 'Error while getting distinct values', err: err});
     })
     .done();
 }
 
+exports.tableDistinct = function (req, res) {
+  dbName = req.params.db;
+  tableName = req.params.table;
+
+  distinct(queries.tableQuery(dbName, tableName), res);
+}
+
 exports.queryDistinct = function (req, res) {
-  params = queryParams(null);
   query = queries.namedQuery(req.params.name);
-  query.then(function (query) {
-    return query.distincts();
-  })
-  .then(function (result) {
-    res.render('distinct', {result: result});
-  })
-  .catch(function (err) {
-    res.render('error', {title: 'Error while getting query distinct values', err: err});
-  })
-  .done();
+  distinct(query, res);
 }
