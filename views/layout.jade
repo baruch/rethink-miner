@@ -18,11 +18,11 @@ html
         a(class='navbar-brand', href='/') Rethink-Miner
         div(class=['collapse', 'navbar-collapse'])
           ul(class=['nav', 'navbar-nav'])
-            li.active
-              a(href='/') Home
-            li
+            li(class=locals.query_active?'active':'')
+              a(href='/') Queries
+            li(class=locals.add_active ? 'active' : '')
               a(href='/add') Add
-            li
+            li(class=locals.table_active ? 'active': '')
               a(href='/tables') Tables
 
           ul.nav.navbar-right
