@@ -166,6 +166,14 @@ exports.manage = function (req, res) {
     .done();
 }
 
+exports.editQuery = function (req, res) {
+  res.render('error', {title: 'dont know to edit', err: null});
+}
+
+exports.deleteQuery = function (req, res) {
+  res.render('error', {title: 'dont know to delete'});
+}
+
 exports.tables = function (req, res) {
   queries.tableList()
   .then(function (results) {

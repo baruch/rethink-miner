@@ -1,0 +1,29 @@
+extends layout
+
+block content
+  h1 Manage Queries
+  p
+    a(href='/manage/add')
+      button(name='add') Add Query
+  div
+    if res.length > 0
+      table(class=['table-striped', 'table-bordered', 'table', 'sortable'])
+        thead
+          tr
+            th(width='70%') Query
+            th Actions
+        tbody
+          each val in res
+            tr
+              td
+                a(href='/q/' + val.name)= val.name
+              td
+                a(href='/manage/edit/' + val.name)
+                  button Edit
+                a(href='/manage/delete/' + val.name)
+                  button Delete
+    else
+      p No queries setup yet
+  div
+    a(href='/manage/add')
+      button Add Query
