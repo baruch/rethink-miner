@@ -10,7 +10,6 @@ var r = require('rethinkdb'),
  */
 
 exports.index = function(req, res) {
-  res.locals.query_active = true;
   queries.queriesList()
     .then(function (results) {
       res.render('index', {title: 'Known Queries', res: results});
@@ -97,12 +96,10 @@ function displayTable(query, params, res) {
 exports.q = function(req, res) {
   params = queryParams(req);
   query = queries.namedQuery(req.params.name);
-  res.locals.query_active = true;
   displayTable(query, params, res);
 }
 
 exports.addShow = function (req, res) {
-  res.locals.add_active = true;
   res.render('add', {result: {name: ''}});
 }
 
@@ -146,7 +143,6 @@ exports.addSaveOrTest = function (req, res) {
   name = req.body.name;
   query = req.body.query;
   fields = req.body.fields;
-  res.locals.add_active = true;
 
   if (req.body.action == 'Save') {
     return addSave(name, query, fields, res);
@@ -158,8 +154,19 @@ exports.addSaveOrTest = function (req, res) {
   }
 }
 
+exports.manage = function (req, res) {
+  queries.queriesList()
+    .then(function (results) {
+      res.render('manage', {res: results});
+    })
+    .catch(function (err) {
+      res.status(500);
+      return res.render('error', {title: 'Failed to list known queries', err: err});
+    })
+    .done();
+}
+
 exports.tables = function (req, res) {
-  res.locals.table_active = true;
   queries.tableList()
   .then(function (results) {
     res.render('tables', {'data': results});
@@ -171,7 +178,6 @@ exports.tables = function (req, res) {
 }
 
 exports.table = function (req, res) {
-  res.locals.table_active = true;
   params = queryParams(req);
 
   dbName = req.params.db;
@@ -196,7 +202,6 @@ function distinct(q, res) {
 }
 
 exports.tableDistinct = function (req, res) {
-  res.locals.table_active = true;
   dbName = req.params.db;
   tableName = req.params.table;
 
@@ -204,7 +209,6 @@ exports.tableDistinct = function (req, res) {
 }
 
 exports.queryDistinct = function (req, res) {
-  res.locals.query_active = true;
   query = queries.namedQuery(req.params.name);
   distinct(query, res);
 }

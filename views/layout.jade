@@ -20,8 +20,8 @@ html
           ul(class=['nav', 'navbar-nav'])
             li(class=locals.query_active?'active':'')
               a(href='/') Queries
-            li(class=locals.add_active ? 'active' : '')
-              a(href='/add') Add
+            li(class=locals.manage_active ? 'active' : '')
+              a(href='/manage') Manage
             li(class=locals.table_active ? 'active': '')
               a(href='/tables') Tables
 

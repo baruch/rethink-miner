@@ -39,11 +39,17 @@ var requireAdmin = express.basicAuth(function(user, pass) {
 });
 
 app.get('/', routes.index);
+app.all('/q*', function (req, res, next) { res.locals.query_active = true; next();})
 app.get('/q/:name', routes.q);
 app.get('/q/:name/distinct', routes.queryDistinct);
-app.all('/add', requireAdmin);
-app.get('/add', routes.addShow);
-app.post('/add', routes.addSaveOrTest);
+
+app.all('/manage*', requireAdmin);
+app.all('/manage*', function (req, res, next) { res.locals.manage_active = true; next();})
+app.get('/manage', routes.manage);
+app.get('/manage/add', routes.addShow);
+app.post('/manage/add', routes.addSaveOrTest);
+
+app.all('/tables*', function (req, res, next) { res.locals.table_active = true; next();})
 app.get('/tables', routes.tables);
 app.get('/table/:db/:table', routes.table);
 app.get('/table/:db/:table/distinct', routes.tableDistinct)
