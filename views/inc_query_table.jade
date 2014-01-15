@@ -33,24 +33,24 @@ if result.headers
         a(href='#') &laquo;
     else
       li
-        a(href='?page_num=0&page_size=' + result.page_size) &laquo;
+        a(href='?page_num=0&page_size=' + result.page_size + orderParam(order)) &laquo;
 
     - for(var i = result.page_num - 4; i < result.page_num; i++)
       - if (i >= 0)
         li
-          a(href='?page_num=' + i + '&page_size=' + result.page_size)= i
+          a(href='?page_num=' + i + '&page_size=' + result.page_size + orderParam(order))= i
     li.active
-      a(href='?page_num=' + result.page_num + '&page_size=' + result.page_size)= result.page_num
+      a(href='?page_num=' + result.page_num + '&page_size=' + result.page_size + orderParam(order))= result.page_num
     - for(var i = result.page_num + 1; i <= result.page_num + 4; i++)
       - if (i <= result.last_page)
         li
-          a(href='?page_num=' + i + '&page_size=' + result.page_size)= i
+          a(href='?page_num=' + i + '&page_size=' + result.page_size + orderParam(order))= i
 
     if result.page_num == result.last_page
       li.disabled
         a(href='#') &raquo;
     else
       li
-        a(href='?page_num=' + result.last_page + '&page_size=' + result.page_size) &raquo;
+        a(href='?page_num=' + result.last_page + '&page_size=' + result.page_size + orderParam(order)) &raquo;
 else
   div No headers for some reason 

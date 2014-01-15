@@ -48,6 +48,14 @@ app.get('/tables', routes.tables);
 app.get('/table/:db/:table', routes.table);
 app.get('/table/:db/:table/distinct', routes.tableDistinct)
 
+app.locals.orderParam = function (order) {
+  if (order) {
+    return '&order=' + order;
+  } else {
+    return '';
+  }
+}
+
 var dbConfig = {
   host : process.env.RDB_HOST || 'localhost',
   port : parseInt(process.env.RDB_PORT) || 28015,
