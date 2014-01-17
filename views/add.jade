@@ -1,6 +1,12 @@
 extends layout
 
 block content
+  script(src='/javascripts/codemirror.js')
+  script(src='/javascripts/codemirror/show-hint.js')
+  script(src='/javascripts/codemirror/javascript-hint.js')
+  script(src='/javascripts/codemirror/matchbrackets.js')
+  link(rel='stylesheet', href='/stylesheets/codemirror.css')
+  link(rel='stylesheet', href='/javascripts/codemirror/show-hint.css')
   h1 Add Query
   if msg
     div Message: #{msg}
@@ -13,13 +19,14 @@ block content
       div.form-group
         label(for='query').col-sm-2.control-label Query: 
         div.col-sm-10
-          input(id='query', name='query', type='text', value=query).form-control
+          textarea(id='query', name='query', type='text').form-control= query
       div.form-group
         div.col-sm-offset-2.col-sm-10
           input(type='submit', name='action', value='Test').btn.btn-info
           input(type='submit', name='action', value='Save').btn.btn-success
       script
-        $("#name").focus();
+        | $("#name").focus();
+        | var editor = CodeMirror.fromTextArea(document.getElementById("query"), {mode: 'javascript', matchBrackets: true});
   div
     if result
       include inc_query_table

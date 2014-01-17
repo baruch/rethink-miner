@@ -7,6 +7,8 @@ html
     link(rel='stylesheet', href='/stylesheets/bootstrap-theme.min.css')
     style.
       body { padding-top: 70px; }
+    script(src='/javascripts/jquery-1.10.2.min.js')
+    script(src='/javascripts/bootstrap.min.js')
   body
     nav(role='navigation', class=['navbar', 'navbar-inverse', 'navbar-fixed-top'])
       div.container
@@ -28,7 +30,5 @@ html
           ul.nav.navbar-right
             li
               a(href='http://github.com/baruch/rethink-miner')= settings.version
-    script(src='/javascripts/jquery-1.10.2.min.js')
-    script(src='/javascripts/bootstrap.min.js')
     div.container
       block content
