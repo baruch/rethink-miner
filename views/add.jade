@@ -1,12 +1,13 @@
 extends layout
 
 block content
+  link(rel='stylesheet', href='/stylesheets/codemirror.css')
+  link(rel='stylesheet', href='/javascripts/codemirror/show-hint.css')
   script(src='/javascripts/codemirror.js')
   script(src='/javascripts/codemirror/show-hint.js')
   script(src='/javascripts/codemirror/javascript-hint.js')
+  script(src='/javascripts/codemirror/javascript.js')
   script(src='/javascripts/codemirror/matchbrackets.js')
-  link(rel='stylesheet', href='/stylesheets/codemirror.css')
-  link(rel='stylesheet', href='/javascripts/codemirror/show-hint.css')
   h1 Add Query
   if msg
     div Message: #{msg}
@@ -26,7 +27,7 @@ block content
           input(type='submit', name='action', value='Save').btn.btn-success
       script
         | $("#name").focus();
-        | var editor = CodeMirror.fromTextArea(document.getElementById("query"), {mode: 'javascript', matchBrackets: true});
+        | var editor = CodeMirror.fromTextArea(document.getElementById("query"), {mode: 'javascript', matchBrackets: true /*, extraKeys: {"Ctrl-Space": "autocomplete"*/}});
   div
     if result
       include inc_query_table
