@@ -62,6 +62,20 @@ function displayTableJsonp(res, params, response) {
   displayTableMethod(res, params, response, res.jsonp, 'jsonp');
 }
 
+function queryParamFilters(req) {
+  var queries = Object.keys(req.query);
+  var filters = queries
+    .filter(function(q) {
+      return q.indexOf('filter_') == 0 && req.query[q];
+    })
+    .reduce(function (acc, q) {
+      key = q.replace(/^filter_/, '');
+      acc[key] = req.query[q].trim();
+      return acc;
+    }, {});
+  return filters;
+}
+
 function queryParams(req) {
   params = {};
 
@@ -73,6 +87,7 @@ function queryParams(req) {
     params.order_by = null;
     params.force_uptodate = false;
     params.name = 'unknown';
+    params.filters = null;
   } else {
     // Use user supplied params
     if (req.query.format == 'csv') {
@@ -92,6 +107,8 @@ function queryParams(req) {
     params.order_by = req.query.order;
     params.force_uptodate = req.query.uptodate || false;
     params.name = req.params.name;
+
+    params.filters = queryParamFilters(req);
   }
 
   return params;

@@ -12,20 +12,28 @@ script(src='/javascripts/sorttable.js').
 div Query result count: #{result.count}
 
 if result.headers
-  table(class=['table-striped', 'table', 'sortable'])
-    thead
-      tr
-        each header in result.headers
-          th= header
-    tbody
-      if result.res
-        each entry in result.res
-          tr
-            each field in entry
-              td= field
-      else
+  form(name='filter_form', id='filter_form', action=result.querybase, method='GET')
+    table(class=['table-striped', 'table', 'sortable'])
+      thead
         tr
-          td(colspan="#{headers.length}") no results
+          each header in result.headers
+            th= header
+        tr
+          each header in result.headers
+            th
+              input(type='text', name='filter_' + header, id='filter_' + header).table-filter
+      tbody
+        if result.res
+          each entry in result.res
+            tr
+              each field in entry
+                td= field
+        else
+          tr
+            td(colspan="#{headers.length}") no results
+  script
+   | function do_filters(evt) { if (evt.which == 13) { console.log("enter pressed"); $("#filter_form").submit(); } }
+   | $(".table-filter").on("keyup", do_filters);
 
   ul.pagination
     if result.page_num == 0
