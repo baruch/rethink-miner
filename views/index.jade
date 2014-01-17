@@ -5,10 +5,14 @@ block content
   p Welcome to #{title}
   ul
     if res.length > 0
+      link(rel='stylesheet', href='/stylesheets/typeahead.js-bootstrap.css')
+      script(src='/javascripts/typeahead.js')
+      div
       table(class=['table-striped', 'table-bordered', 'table', 'sortable'])
         thead
           tr
             th(width='70%') Query
+              input(id='search', type='text').form-control
             th Views
         tbody
           each val in res
@@ -18,8 +22,9 @@ block content
               td
                 a(href='/q/' + val.name + '/distinct') Distinct Values
     else
-      p No queries setup yet
-  p
-    | You can 
-    a(href="/add", id='add') Add
-    |  a query
+      p No queries setup yet, try to 
+        a(href='/manage/add') add some
+ 
+  script
+    | $('#search').typeahead({name: 'queries', prefetch: {url: '/queries', ttl: 60*60}})
+    | $('#search').on('typeahead:selected', function (object, datum) { window.location.href = datum.href })
