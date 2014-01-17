@@ -100,26 +100,26 @@ exports.q = function(req, res) {
 }
 
 exports.addShow = function (req, res) {
-  res.render('add', {result: {name: ''}});
+  res.render('add', {result: {name: ''}, action_target:'/manage/add'});
 }
 
-function addSave(name, query, fields, res) {
+function addSave(name, query, fields, res, action_target) {
   queries.namedQueryNew(name, query, fields)
   .then(function (q) {
     return q.save();
   }).done(function(result) {
     msg = 'Saved';
-    if (result.inserted == 0) {
+    if (result.first_error) {
       msg = 'Failed to save for:' + result.first_error;
     }
 
-    return res.render('add', {name: name, query: query, fields: fields, msg: msg});
+    return res.render('add', {name: name, query: query, fields: fields, msg: msg, action_target: action_target});
   }, function(err) {
-    res.render('add', {name: name, query: query, fields: fields, msg: 'Error while saving:' + err})
+    res.render('add', {name: name, query: query, fields: fields, msg: 'Error while saving:' + err, action_target: action_target})
   });
 }
 
-function addTest(name, query, fields, res) {
+function addTest(name, query, fields, res, action_target) {
   queries.namedQueryNew(name, query, fields)
   .then(function (q) {
     params = queryParams(null);
@@ -131,7 +131,7 @@ function addTest(name, query, fields, res) {
     result.fields = fields;
     return res.render('add', result);
   }, function (err) {
-    return res.render('add', {name: name, query: query, msg: err.message});
+    return res.render('add', {name: name, query: query, msg: err.message, action_target: action_target});
   })
   .catch(function (err) {
     return res.render('error', {title: 'Failed creating a new named query', err: err});
@@ -140,18 +140,7 @@ function addTest(name, query, fields, res) {
 }
 
 exports.addSaveOrTest = function (req, res) {
-  name = req.body.name;
-  query = req.body.query;
-  fields = req.body.fields;
-
-  if (req.body.action == 'Save') {
-    return addSave(name, query, fields, res);
-  } else if (req.body.action == 'Test') {
-    return addTest(name, query, fields, res);
-  } else {
-    res.status(404);
-    res.render('error', {title: 'Unknown action in add', description: 'got action "' + req.body.action + '"'});
-  }
+  saveOrTestQuery(req, res, '/manage/add');
 }
 
 exports.manage = function (req, res) {
@@ -167,11 +156,54 @@ exports.manage = function (req, res) {
 }
 
 exports.editQuery = function (req, res) {
-  res.render('error', {title: 'dont know to edit', err: null});
+  query = queries.namedQuery(req.params.name);
+  query
+    .then(function (q) {
+      res.render('add', {name: q.name, query: q.query, action_target: '/manage/edit/' + q.name});
+    })
+    .catch(function (err) {
+      res.status(500);
+      return res.render('error', {title: 'Failed to edit query', err: err});
+    })
+    .done();
+}
+
+function saveOrTestQuery(req, res, action_target) {
+  name = req.body.name;
+  query = req.body.query;
+  fields = req.body.fields;
+
+  if (req.body.action == 'Save') {
+    return addSave(name, query, fields, res, action_target);
+  } else if (req.body.action == 'Test') {
+    return addTest(name, query, fields, res, action_target);
+  } else {
+    res.status(404);
+    res.render('error', {title: 'Unknown action in add', description: 'got action "' + req.body.action + '"'});
+  }
+}
+
+exports.saveOrTestEditedQuery = function (req, res) {
+  saveOrTestQuery(req, res, '/manage/edit/' + req.params.name);
 }
 
 exports.deleteQuery = function (req, res) {
-  res.render('error', {title: 'dont know to delete'});
+  query = queries.namedQuery(req.params.name);
+  query.then(function (q) {
+    if (req.query.action == 'Delete') {
+      q.deleteQuery()
+      .then(function (result) {
+        res.render('delete_query', {name: q.name, query: q.query, msg: 'Query Deleted'});
+      })
+      .done();
+    } else {
+      res.render('delete_query', {name: q.name, query: q.query});
+    }
+  })
+  .catch(function (err) {
+    res.render('error', {title: 'Cant delete query ' + req.params.name, err: err});
+  })
+  .done();
 }
 
 exports.tables = function (req, res) {

@@ -49,6 +49,7 @@ app.get('/manage', routes.manage);
 app.get('/manage/add', routes.addShow);
 app.post('/manage/add', routes.addSaveOrTest);
 app.get('/manage/edit/:name', routes.editQuery);
+app.post('/manage/edit/:name', routes.saveOrTestEditedQuery);
 app.get('/manage/delete/:name', routes.deleteQuery);
 
 app.all('/tables*', function (req, res, next) { res.locals.table_active = true; next();})

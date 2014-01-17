@@ -5,7 +5,7 @@ block content
   if msg
     div Message: #{msg}
   div
-    form(action='/add',method='post',role='form').form-horizontal
+    form(action=action_target,method='post',role='form').form-horizontal
       div.form-group
         label(for='name').col-sm-2.control-label Name: 
         div.col-sm-10

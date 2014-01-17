@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1 Delete Query
+  if msg
+    p Message: #{msg}
+  div
+    form(role='form').form-horizontal
+      div.form-group
+        label(for='name').col-sm-2.control-label Name: 
+        div.col-sm-10
+          input(id='name', name='name', type='text', value=name, disabled).form-control
+      div.form-group
+        label(for='query').col-sm-2.control-label Query: 
+        div.col-sm-10
+          input(id='query', name='query', type='text', value=query, disabled).form-control
+      div.form-group
+        div.col-sm-offset-2.col-sm-10
+          input(type='submit', name='action', value='Delete').btn.btn-warn
