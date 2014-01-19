@@ -124,6 +124,7 @@ function displayTable(query, params, res) {
       return res.render('error', {title: 'Failed to get query setup', err: err});
     })
     .then(function (response) {
+      response.title = 'Results for ' + response.result.name;
       params.display(res, params, response);
     })
     .catch(function (err) {
@@ -140,7 +141,7 @@ exports.q = function(req, res) {
 }
 
 exports.addShow = function (req, res) {
-  res.render('add', {result: {name: ''}, action_target:'/manage/add'});
+  res.render('add', {title: 'Add Query', result: {name: ''}, action_target:'/manage/add'});
 }
 
 function addSave(name, query, fields, res, action_target) {
@@ -153,9 +154,9 @@ function addSave(name, query, fields, res, action_target) {
       msg = 'Failed to save for:' + result.first_error;
     }
 
-    return res.render('add', {name: name, query: query, fields: fields, msg: msg, action_target: action_target});
+    return res.render('add', {title: 'Add Query - Saved', name: name, query: query, fields: fields, msg: msg, action_target: action_target});
   }, function(err) {
-    res.render('add', {name: name, query: query, fields: fields, msg: 'Error while saving:' + err, action_target: action_target})
+    res.render('add', {title: 'Add Query', name: name, query: query, fields: fields, msg: 'Error while saving:' + err, action_target: action_target})
   });
 }
 
@@ -169,9 +170,10 @@ function addTest(name, query, fields, res, action_target) {
     result.name = name;
     result.query = query;
     result.fields = fields;
+    result.title = 'Add Query';
     return res.render('add', result);
   }, function (err) {
-    return res.render('add', {name: name, query: query, msg: err.message, action_target: action_target});
+    return res.render('add', {title: 'Add Query', name: name, query: query, msg: err.message, action_target: action_target});
   })
   .catch(function (err) {
     return res.render('error', {title: 'Failed creating a new named query', err: err});
@@ -186,7 +188,7 @@ exports.addSaveOrTest = function (req, res) {
 exports.manage = function (req, res) {
   queries.queriesList()
     .then(function (results) {
-      res.render('manage', {res: results});
+      res.render('manage', {title: 'Manage Queries', res: results});
     })
     .catch(function (err) {
       res.status(500);
@@ -199,7 +201,7 @@ exports.editQuery = function (req, res) {
   query = queries.namedQuery(req.params.name);
   query
     .then(function (q) {
-      res.render('add', {name: q.name, query: q.query, action_target: '/manage/edit/' + q.name});
+      res.render('add', {title: 'Edit Query ' + q.name, name: q.name, query: q.query, action_target: '/manage/edit/' + q.name});
     })
     .catch(function (err) {
       res.status(500);
@@ -233,11 +235,11 @@ exports.deleteQuery = function (req, res) {
     if (req.query.action == 'Delete') {
       q.deleteQuery()
       .then(function (result) {
-        res.render('delete_query', {name: q.name, query: q.query, msg: 'Query Deleted'});
+        res.render('delete_query', {title: 'Deleted Query', name: q.name, query: q.query, msg: 'Query Deleted'});
       })
       .done();
     } else {
-      res.render('delete_query', {name: q.name, query: q.query});
+      res.render('delete_query', {title: 'Delete Query ' + q.name, name: q.name, query: q.query});
     }
   })
   .catch(function (err) {
@@ -249,7 +251,7 @@ exports.deleteQuery = function (req, res) {
 exports.tables = function (req, res) {
   queries.tableList()
   .then(function (results) {
-    res.render('tables', {'data': results});
+    res.render('tables', {title: 'List of Tables', data: results});
   })
   .catch(function (err) {
     res.render('error', {title: 'Error while listing tables', err: err});
@@ -273,7 +275,7 @@ function distinct(q, res) {
       return query.distincts();
     })
     .then(function (result) {
-      res.render('distinct', {result: result});
+      res.render('distinct', {title: 'Distinct values in ' + q.inspect().value().name, result: result});
     })
     .catch(function (err) {
       res.render('error', {title: 'Error while getting distinct values', err: err});
