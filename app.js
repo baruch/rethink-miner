@@ -46,7 +46,7 @@ app.get('/q/:name', routes.q);
 app.get('/q/:name/distinct', routes.queryDistinct);
 
 app.all('/manage*', requireAdmin);
-app.all('/manage*', function (req, res, next) { res.locals.manage_active = true; next();})
+app.all('/manage*', function (req, res, next) { res.locals.query_active = true; next();})
 app.get('/manage', routes.manage);
 app.get('/manage/add', routes.addShow);
 app.post('/manage/add', routes.addSaveOrTest);
