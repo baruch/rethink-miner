@@ -21,29 +21,6 @@ exports.index = function(req, res) {
     .done();
 }
 
-function complete_tokens(name) {
-  return name.replace('_', ' ').split(' ');
-}
-
-exports.queries = function (req, res) {
-  queries.queriesList()
-    .map(function (result) {
-      return {
-        'value': result.name,
-        'tokens': complete_tokens(result.name),
-        'href': '/q/' + result.name
-      };
-    })
-    .then(function (results) {
-      res.json(results);
-    })
-    .catch(function (err) {
-      res.status(500);
-      return res.render('error', {title: 'Failed to list known queries', err: err});
-    })
-    .done();
-}
-
 function displayTableHtml(res, params, response) {
   res.render('query', response);
 }

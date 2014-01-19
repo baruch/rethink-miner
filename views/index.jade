@@ -5,16 +5,14 @@ block content
   p Welcome to #{title}
   ul
     if res.length > 0
-      link(rel='stylesheet', href='/stylesheets/typeahead.js-bootstrap.css')
-      script(src='/javascripts/typeahead.js')
       div
-      table(class=['table-striped', 'table-bordered', 'table', 'sortable'])
+      table(class=['table-striped', 'table-bordered', 'table'])
         thead
           tr
             th(width='70%') Query
-              input(id='search', type='text').form-control
+              input(id='search', type='text').form-control.filter
             th Views
-        tbody
+        tbody.searchable
           each val in res
             tr
               td
@@ -26,5 +24,10 @@ block content
         a(href='/manage/add') add some
  
   script
-    | $('#search').typeahead({name: 'queries', prefetch: {url: '/queries', ttl: 60*60}})
-    | $('#search').on('typeahead:selected', function (object, datum) { window.location.href = datum.href })
+    | $('input.filter').on('keyup', function() {
+    |   var rex = new RegExp($(this).val(), 'i');
+    |   $('.searchable tr').hide();
+    |   $('.searchable tr').filter(function() {
+    |     return rex.test($(this).text());
+    |   }).show();
+    | });

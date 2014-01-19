@@ -45,9 +45,6 @@ app.all('/q*', function (req, res, next) { res.locals.query_active = true; next(
 app.get('/q/:name', routes.q);
 app.get('/q/:name/distinct', routes.queryDistinct);
 
-app.all('/queries*', function (req, res, next) { res.locals.query_active = true; next();})
-app.get('/queries', routes.queries);
-
 app.all('/manage*', requireAdmin);
 app.all('/manage*', function (req, res, next) { res.locals.manage_active = true; next();})
 app.get('/manage', routes.manage);
