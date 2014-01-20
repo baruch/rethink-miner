@@ -140,6 +140,15 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
               box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.075), 0 0 8px rgba(82, 168, 236, 0.6);  
     }
 
+    /* Auto-resize field */
+    .CodeMirror {
+      border: 1px solid #eee;
+      height: auto;
+    }
+    .CodeMirror-scroll {
+      overflow-y: hidden;
+      overflow-x: auto;
+    }
 /* STOP */
 
 /* The rest of this file contains styles related to the mechanics of
