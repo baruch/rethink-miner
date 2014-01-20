@@ -3,7 +3,6 @@
 .CodeMirror {
   /* Set height, width, borders, and global font properties here */
   font-family: monospace;
-  height: 300px;
 }
 .CodeMirror-scroll {
   /* Set scrolling behaviour here */
@@ -103,10 +102,12 @@ div.CodeMirror span.CodeMirror-nonmatchingbracket {color: #f22;}
 
       /* Necessary so the scrollbar can be absolutely positioned within the wrapper on Lion. */
       position: relative;
+
       /* This prevents unwanted scrollbars from showing up on the body and wrapper in IE. */
       overflow: hidden;
       background-color: white;
-      width: 530px;
+      width: 100%;
+      height: 15em;
 
       /* Copied from Bootstrap's textarea */
       display: inline-block;
