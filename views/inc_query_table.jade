@@ -18,6 +18,11 @@ if result.headers
   form(name='filter_form', id='filter_form', action=result.querybase, method='GET')
     div
       span
+        | Fields:
+        select(multiple,name='fields',id='fields_select')
+          each header in result.headers
+            option(value=header)= header
+      span
         | Order:
         select(multiple,name='order',id='order_select')
           each header in result.headers

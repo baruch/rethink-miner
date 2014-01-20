@@ -65,6 +65,7 @@ function queryParams(req) {
     params.force_uptodate = false;
     params.name = 'unknown';
     params.filters = null;
+    params.fields = null;
   } else {
     // Use user supplied params
     if (req.query.format == 'csv') {
@@ -84,6 +85,7 @@ function queryParams(req) {
     params.order_by = req.query.order;
     params.force_uptodate = req.query.uptodate || false;
     params.name = req.params.name;
+    params.fields = req.query.fields;
 
     params.filters = queryParamFilters(req);
   }
