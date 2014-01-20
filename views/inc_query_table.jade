@@ -8,11 +8,23 @@ div.panel-group#accordion
       | Code: #{result.query}
 
 script(src='/javascripts/sorttable.js').
+link(rel='stylesheet', href='/stylesheets/bootstrap-multiselect.css')
+script(src='/javascripts/bootstrap-multiselect.js')
+script(src='/javascripts/query_table.js')
 
 div Query result count: #{result.count}
 
 if result.headers
   form(name='filter_form', id='filter_form', action=result.querybase, method='GET')
+    div
+      span
+        | Order:
+        select(multiple,name='order',id='order_select')
+          each header in result.headers
+            option(value=header)= header
+            option(value='-' + header) #{header} (desc)
+      span
+        input(type='submit', name='action', value='Filter').btn.btn-success
     table(class=['table-striped', 'table', 'sortable'])
       thead
         tr
