@@ -27,7 +27,7 @@ block content
           input(type='submit', name='action', value='Save').btn.btn-success
       script
         | $("#name").focus();
-        | var editor = CodeMirror.fromTextArea(document.getElementById("query"), {mode: {name: 'javascript', statementIndent: 2}, matchBrackets: true, lineWrapping: true /*, extraKeys: {"Ctrl-Space": "autocomplete"}*/});
+        | var editor = CodeMirror.fromTextArea(document.getElementById("query"), {mode: {name: 'javascript', statementIndent: 2}, matchBrackets: true, lineWrapping: true , extraKeys: {"Ctrl-Enter": function (cm) { $('.btn-info').click(); } /*"Ctrl-Space": "autocomplete"*/}});
   div
     if result
       include inc_query_table
