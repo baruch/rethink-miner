@@ -15,6 +15,16 @@ After you have such a query or two go the index page and you'll be able to choos
 
 rethink-miner uses nodejs, express and rethinkdb.
 
+INSTALL
+-------
+
+* `git clone https://github.com/baruch/rethink-miner.git`
+* `cd rethink-miner`
+* `npm install`
+* `PATH=node_modules/.bin:${PATH} RDB_HOST=MY_RETHINK_DB_HOST node server.js`
+
+Upon first run a database will be created in your RethinkDB called `rethink_miner` and it will be populated with the `queries` table that has a primary key on the `name` field.
+
 CAVEATS
 -------
 
