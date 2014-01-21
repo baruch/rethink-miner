@@ -14,7 +14,7 @@
     "debug": "0.7.4",
     "async": "0.2.9",
     "forever": "0.10.11",
-    "extreme-csv": "0.6.x",
+    "express-csv": "0.6.x",
     "bluebird": "0.11.6",
     "reql-then": "0.0.3"
   },
