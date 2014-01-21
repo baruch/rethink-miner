@@ -26,8 +26,8 @@ if result.headers
         | Order:
         select(multiple,name='order',id='order_select')
           each header in result.headers
-            option(value=header)= header
-            option(value='-' + header) #{header} (desc)
+            option(value=header, selected=(order && order.indexOf(header) > -1))= header
+            option(value='-' + header, selected=(order && order.indexOf('-' + header) > -1)) #{header} (desc)
       span
         input(type='submit', name='action', value='Filter').btn.btn-success
     table(class=['table-striped', 'table', 'sortable'])
