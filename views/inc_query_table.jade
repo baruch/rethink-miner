@@ -38,7 +38,7 @@ if result.headers
         tr
           each header in result.headers
             th
-              input(type='text', name='filter_' + header, id='filter_' + header).table-filter
+              input(type='text', name='filter_' + header, id='filter_' + header, value=filters[header]).table-filter
       tbody
         if result.res
           each entry in result.res
