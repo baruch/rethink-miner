@@ -1,7 +1,7 @@
 all: test lint
 
 test:
-	mocha
+	PATH=node_modules/.bin:${PATH} mocha
 
 lint:
 	PATH=node_modules/.bin:${PATH} jshint app.js routes/index.js
