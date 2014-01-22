@@ -8,12 +8,16 @@ block content
       tr
         th Key
         th Count
+        th Min
+        th Max
         th Distinct Values
     tbody
       each key in result
         tr
           td= key.key
           td= key.count
+          td= key.min
+          td= key.max
           td
             each val in key.distincts
               span "#{val}", 
