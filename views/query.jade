@@ -1,5 +1,68 @@
 extends layout
 
 block content
-  include inc_query_table
+  div.panel-group#accordion
+    div(class=['panel', 'panel-default'])
+      h1.panel-title
+        a(href='#collapseOne', 'data-toggle'='collapse', 'data-parent'='#accordion')
+          | Query: #{result.name}
+    div(class=['panel-collapse', 'collapse'], id='collapseOne')
+      div.panel-body
+        | Code: #{result.query}
+
+  script(src='/javascripts/sorttable.js').
+  link(rel='stylesheet', href='/stylesheets/bootstrap-multiselect.css')
+  script(src='/javascripts/bootstrap-multiselect.js')
+  script(src='/javascripts/query_table.js')
+
+  div Query result count: #{result.count}
+
+  if result.headers
+    form(name='filter_form', id='filter_form', action=result.querybase, method='GET')
+      div
+        span
+          | Fields:
+          select(multiple,name='fields',id='fields_select')
+            each header in result.headers
+              option(value=header)= header
+        span
+          | Order:
+          select(multiple,name='order',id='order_select')
+            each header in result.headers
+              option(value=header, selected=(order && order.indexOf(header) > -1))= header
+              option(value='-' + header, selected=(order && order.indexOf('-' + header) > -1)) #{header} (desc)
+        span
+          input(type='submit', name='action', value='Filter').btn.btn-success
+      include inc_query_table
+    script
+     | function do_filters(evt) { if (evt.which == 13) { console.log("enter pressed"); $("#filter_form").submit(); } }
+     | $(".table-filter").on("keyup", do_filters);
+
+    ul.pagination
+      if result.page_num == 0
+        li.disabled
+          a(href='#') &laquo;
+      else
+        li
+          a(href='?page_num=0&page_size=' + result.page_size + orderParam(order)) &laquo;
+
+      - for(var i = result.page_num - 4; i < result.page_num; i++)
+        - if (i >= 0)
+          li
+            a(href='?page_num=' + i + '&page_size=' + result.page_size + orderParam(order))= i
+      li.active
+        a(href='?page_num=' + result.page_num + '&page_size=' + result.page_size + orderParam(order))= result.page_num
+      - for(var i = result.page_num + 1; i <= result.page_num + 4; i++)
+        - if (i <= result.last_page)
+          li
+            a(href='?page_num=' + i + '&page_size=' + result.page_size + orderParam(order))= i
+
+      if result.page_num == result.last_page
+        li.disabled
+          a(href='#') &raquo;
+      else
+        li
+          a(href='?page_num=' + result.last_page + '&page_size=' + result.page_size + orderParam(order)) &raquo;
+  else
+    div No headers for some reason 
   include inc_query_format

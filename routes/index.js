@@ -22,6 +22,7 @@ exports.index = function(req, res) {
 }
 
 function displayTableHtml(res, params, response) {
+  response.query_page = true;
   res.render('query', response);
 }
 
