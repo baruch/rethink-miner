@@ -32,4 +32,13 @@ rethink-miner uses eval() internally to run the query, this means that this is a
 
 Do not expose the webapp to possibly malicious users!
 
+Credits
+-------
+
+* The heavy lifting of the query handling is done by [RethinkDB](http://rethinkdb.com/)
+* The filtering of the tables is based on the interface of [TableFilter](http://tablefilter.free.fr/)
+
+Contact
+-------
+
 Baruch Even <baruch@ev-en.org>
