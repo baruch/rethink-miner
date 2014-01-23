@@ -121,7 +121,7 @@ exports.q = function(req, res) {
 }
 
 exports.addShow = function (req, res) {
-  res.render('add', {title: 'Add Query', result: {name: ''}, action_target:'/manage/add'});
+  res.render('add', {title: 'Add Query', query: req.query.q || '', action_target:'/manage/add'});
 }
 
 function addSave(name, query, fields, res, action_target) {

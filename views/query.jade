@@ -33,6 +33,9 @@ block content
               option(value='-' + header, selected=(order && order.indexOf('-' + header) > -1)) #{header} (desc)
         span
           input(type='submit', name='action', value='Filter').btn.btn-success
+        span
+          a(href='/manage/add?q=' + result.query)
+            span.btn.btn-info Save
       include inc_query_table
     script
      | function do_filters(evt) { if (evt.which == 13) { console.log("enter pressed"); $("#filter_form").submit(); } }
