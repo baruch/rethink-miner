@@ -29,7 +29,10 @@ block content
           | var editor = CodeMirror.fromTextArea(document.getElementById("dquery"), {mode: {name: 'javascript', statementIndent: 2}, readOnly: true, matchBrackets: true, lineWrapping: true});
           | $('.collapse').on('shown.bs.collapse', function () { editor.refresh(); });
 
-  div Query result count: #{result.count}
+  div
+    span Query result count: #{result.count}
+    br
+    span Query time: #{result.time} msecs
 
   if result.headers
     form(name='filter_form', id='filter_form', action=result.querybase, method='GET')
