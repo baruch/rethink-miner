@@ -1,6 +1,19 @@
 extends layout
 
 block content
+  link(rel='stylesheet', href='/stylesheets/codemirror.css')
+  link(rel='stylesheet', href='/javascripts/codemirror/show-hint.css')
+  link(rel='stylesheet', href='/stylesheets/bootstrap-multiselect.css')
+
+  script(src='/javascripts/codemirror.js')
+  script(src='/javascripts/codemirror/show-hint.js')
+  script(src='/javascripts/codemirror/javascript-hint.js')
+  script(src='/javascripts/codemirror/javascript.js')
+  script(src='/javascripts/codemirror/matchbrackets.js')
+  script(src='/javascripts/sorttable.js').
+  script(src='/javascripts/bootstrap-multiselect.js')
+  script(src='/javascripts/query_table.js')
+
   div.panel-group#accordion
     div(class=['panel', 'panel-default'])
       h1.panel-title
@@ -12,22 +25,9 @@ block content
         div.col-sm-10
           textarea(id='dquery', name='query', type='text').dquery.form-control= query
             | #{result.query}
-        link(rel='stylesheet', href='/stylesheets/codemirror.css')
-        link(rel='stylesheet', href='/javascripts/codemirror/show-hint.css')
-        script(src='/javascripts/codemirror.js')
-        script(src='/javascripts/codemirror/show-hint.js')
-        script(src='/javascripts/codemirror/javascript-hint.js')
-        script(src='/javascripts/codemirror/javascript.js')
-        script(src='/javascripts/codemirror/matchbrackets.js')
         script
           | var editor = CodeMirror.fromTextArea(document.getElementById("dquery"), {mode: {name: 'javascript', statementIndent: 2}, readOnly: true, matchBrackets: true, lineWrapping: true});
           | $('.collapse').on('shown.bs.collapse', function () { editor.refresh(); });
-
-
-  script(src='/javascripts/sorttable.js').
-  link(rel='stylesheet', href='/stylesheets/bootstrap-multiselect.css')
-  script(src='/javascripts/bootstrap-multiselect.js')
-  script(src='/javascripts/query_table.js')
 
   div Query result count: #{result.count}
 
