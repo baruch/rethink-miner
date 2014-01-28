@@ -249,10 +249,10 @@ exports.table = function (req, res) {
   displayTable(query, params, res);
 }
 
-function distinct(q, res) {
+function distinct(q, res, params) {
   q
     .then(function (query) {
-      return query.distincts();
+      return query.distincts(params);
     })
     .then(function (result) {
       res.render('distinct', {title: 'Distinct values in ' + q.inspect().value().name, result: result});
@@ -266,11 +266,13 @@ function distinct(q, res) {
 exports.tableDistinct = function (req, res) {
   dbName = req.params.db;
   tableName = req.params.table;
+  params = queryParams(req);
 
-  distinct(queries.tableQuery(dbName, tableName), res);
+  distinct(queries.tableQuery(dbName, tableName), res, params);
 }
 
 exports.queryDistinct = function (req, res) {
   query = queries.namedQuery(req.params.name);
-  distinct(query, res);
+  params = queryParams(req);
+  distinct(query, res, params);
 }
