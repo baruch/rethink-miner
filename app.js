@@ -59,12 +59,25 @@ app.get('/tables', routes.tables);
 app.get('/table/:db/:table', routes.table);
 app.get('/table/:db/:table/distinct', routes.tableDistinct)
 
-app.locals.orderParam = function (order) {
+app.locals.queryParams = function (order, filters, fields) {
+  var p = '';
   if (order) {
-    return '&order=' + order;
-  } else {
-    return '';
+    p += '&order=' + order;
   }
+
+  if (filters) {
+    for (var filter in filters) {
+      p += '&filter_' + filter + '=' + filters[filter];
+    }
+  }
+
+  if (fields) {
+    for (var field in fields) {
+      // TODO: Need to handle the field filters too
+    }
+  }
+
+  return p;
 }
 
 var dbConfig = {

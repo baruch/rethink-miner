@@ -64,25 +64,25 @@ block content
           a(href='#') &laquo;
       else
         li
-          a(href='?page_num=0&page_size=' + result.page_size + orderParam(order)) &laquo;
+          a(href='?page_num=0&page_size=' + result.page_size + queryParams(order, filters, fields)) &laquo;
 
       - for(var i = result.page_num - 4; i < result.page_num; i++)
         - if (i >= 0)
           li
-            a(href='?page_num=' + i + '&page_size=' + result.page_size + orderParam(order))= i
+            a(href='?page_num=' + i + '&page_size=' + result.page_size + queryParams(order, filters, fields))= i
       li.active
-        a(href='?page_num=' + result.page_num + '&page_size=' + result.page_size + orderParam(order))= result.page_num
+        a(href='?page_num=' + result.page_num + '&page_size=' + result.page_size + queryParams(order, filters, fields))= result.page_num
       - for(var i = result.page_num + 1; i <= result.page_num + 4; i++)
         - if (i <= result.last_page)
           li
-            a(href='?page_num=' + i + '&page_size=' + result.page_size + orderParam(order))= i
+            a(href='?page_num=' + i + '&page_size=' + result.page_size + queryParams(order, filters, fields))= i
 
       if result.page_num == result.last_page
         li.disabled
           a(href='#') &raquo;
       else
         li
-          a(href='?page_num=' + result.last_page + '&page_size=' + result.page_size + orderParam(order)) &raquo;
+          a(href='?page_num=' + result.last_page + '&page_size=' + result.page_size + queryParams(order, filters, fields)) &raquo;
   else
     div No headers for some reason 
   include inc_query_format

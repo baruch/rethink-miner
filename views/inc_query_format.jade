@@ -1,3 +1,5 @@
-div
-  | Format: 
-  a(href='?format=csv' + orderParam(order)) CSV
+ul
+  li Format: 
+    a(href='?format=csv' + queryParams(order, filters, fields)) CSV
+  li Table Analysis:
+    a(href=result.querybase + '/distinct?' + queryParams(order, filters, fields)) Distinct
