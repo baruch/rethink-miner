@@ -72,8 +72,12 @@ app.locals.queryParams = function (order, filters, fields) {
   }
 
   if (fields) {
-    for (var field in fields) {
-      // TODO: Need to handle the field filters too
+    var fields = typeof(fields) == 'object' ? fields : [fields];
+    if (fields.indexOf('multiselect-all') == -1) {
+      // Not all of them, show the subset
+      fields.forEach(function (field) {
+        p += '&fields=' + field;
+      });
     }
   }
 
