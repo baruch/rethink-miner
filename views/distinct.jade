@@ -1,9 +1,7 @@
 extends layout
 
 block content
-  script(src='/javascripts/sorttable.js').
-
-  table(class=['table-striped', 'table', 'sortable'])
+  table(class=['table-striped', 'table'])
     thead
       tr
         th Key
@@ -14,7 +12,8 @@ block content
     tbody
       each key in result
         tr
-          td= key.key
+          td
+            a(href='histogram/' + key.key)= key.key
           td= key.count
           td= key.min
           td= key.max

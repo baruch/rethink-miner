@@ -263,16 +263,52 @@ function distinct(q, res, params) {
     .done();
 }
 
-exports.tableDistinct = function (req, res) {
+function tableQuery(req) {
   dbName = req.params.db;
   tableName = req.params.table;
+  q = queries.tableQuery(dbName, tableName);
+  return q;
+}
+
+function queryQuery(req) {
+  return queries.namedQuery(req.params.name);
+}
+
+exports.tableDistinct = function (req, res) {
+  q = tableQuery(req);
   params = queryParams(req);
 
-  distinct(queries.tableQuery(dbName, tableName), res, params);
+  distinct(q, res, params);
 }
 
 exports.queryDistinct = function (req, res) {
-  query = queries.namedQuery(req.params.name);
+  query = queryQuery(req);
   params = queryParams(req);
   distinct(query, res, params);
+}
+
+function keyHistogram(res, req, query, params) {
+  key = req.params.key;
+  query.then(function (query) {
+      return query.histogram(key, params);
+    })
+    .then(function (result) {
+      res.render('histogram_key', {result: result, key: key});
+    })
+    .catch(function (err) {
+      res.render('error', {title: 'Error while getting histogram for key ' + key, err: err})
+    })
+    .done();
+}
+
+exports.tableHistogram = function(req, res) {
+  q = tableQuery(req);
+  params = queryParams(req);
+  keyHistogram(res, req, q, params);
+}
+
+exports.queryHistogram = function (req, res) {
+  q = queryQuery(req);
+  params = queryParams(req);
+  keyHistogram(res, req, q, params);
 }

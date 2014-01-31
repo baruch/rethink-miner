@@ -1,8 +1,9 @@
-table(class=['table-striped', 'table', 'sortable'])
+table(class=['table-striped', 'table'])
   thead
     tr
       each header in result.headers
-        th= header
+        th
+          a(href=result.querybase + '/histogram/' + header)= header
     if query_page
       tr
         each header in result.headers

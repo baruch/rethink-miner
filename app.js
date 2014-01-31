@@ -41,9 +41,9 @@ var requireAdmin = express.basicAuth(function(user, pass) {
 
 app.get('/', routes.index);
 app.all('/q*', function (req, res, next) { res.locals.query_active = true; next();})
-app.all('/q*', function (req, res, next) { res.locals.query_active = true; next();})
 app.get('/q/:name', routes.q);
 app.get('/q/:name/distinct', routes.queryDistinct);
+app.get('/q/:name/histogram/:key', routes.queryHistogram);
 
 app.all('/manage*', requireAdmin);
 app.all('/manage*', function (req, res, next) { res.locals.query_active = true; next();})
@@ -58,6 +58,7 @@ app.all('/tables*', function (req, res, next) { res.locals.table_active = true; 
 app.get('/tables', routes.tables);
 app.get('/table/:db/:table', routes.table);
 app.get('/table/:db/:table/distinct', routes.tableDistinct)
+app.get('/table/:db/:table/histogram/:key', routes.tableHistogram)
 
 app.locals.queryParams = function (order, filters, fields) {
   var p = '';
