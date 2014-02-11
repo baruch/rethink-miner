@@ -1,6 +1,6 @@
 {
   "name": "rethink-miner",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "author": "Baruch Even <baruch@ev-en.org>",
   "description": "A webapp to help mine data in a rethinkdb database",
   "private": false,
