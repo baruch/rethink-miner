@@ -58,7 +58,7 @@ block content
           | $('.clear').on('click', function () {
           |   $('.table-filter').val('');
           | })
-    include inc_query_table
+      include inc_query_table
     script
      | function do_filters(evt) { if (evt.which == 13) { console.log("enter pressed"); $("#filter_form").submit(); } }
      | $(".table-filter").on("keyup", do_filters);
