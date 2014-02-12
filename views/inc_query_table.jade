@@ -1,18 +1,24 @@
 table(class=['table-striped', 'table'])
   thead
     tr
+      th
       each header in result.headers
         th
           a(href=result.querybase + '/histogram/' + header)= header
     if query_page
       tr
+        th
+          div(data-container="body", data-toggle="popover", data-placement="right", data-html="1", data-original-title="Supported filters", data-content="&lt;, &lt;=, &gt;, &gt;= -- numeric operators<br/>{ -- String Prefix<br/>} -- String Suffix<br/>= -- String equal<br/>regex: -- Regular Expression").btn.btn-default.glyphicon.glyphicon-question-sign
+          script
+            | $('.glyphicon-question-sign').popover();
         each header in result.headers
           th
-            input(type='text', name='filter_' + header, id='filter_' + header, value=filters[header]).table-filter
+            input(type='text', name='filter_' + header, id='filter_' + header, value=filters[header]).table-filter.form-control
   tbody
     if result.res
       each entry in result.res
         tr
+          td
           each field in entry
             td= field
     else
