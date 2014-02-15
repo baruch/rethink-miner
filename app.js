@@ -95,9 +95,10 @@ module.exports = app;
 
 if (!module.parent) {
   // start serving requests
-  db.setup(dbConfig, function() {
+  db.setup(dbConfig).then(function() {
     http.createServer(app).listen(app.get('port'), function(){
       console.log('Server listening on port ' + app.get('port'));
     });
-  });
+  })
+  .done();
 }
