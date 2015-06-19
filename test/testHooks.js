@@ -1,5 +1,5 @@
 //process.env.NODE_ENV = 'test';
-process.env.RDB_HOST = 'nas';
+process.env.RDB_HOST = 'localhost';
 process.env.RDB_PORT = 28015;
 process.env.RDB_DB = 'rethink_miner_test_db';
 
