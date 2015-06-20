@@ -8,7 +8,6 @@ var express = require('express');
 var routes = require('./routes');
 var http = require('http');
 var path = require('path');
-var rdb = require('rethinkdb');
 var db = require('./lib/db');
 
 var app = express();
@@ -86,9 +85,9 @@ app.locals.queryParams = function (order, filters, fields) {
 }
 
 var dbConfig = {
-  host : process.env.RDB_HOST || 'localhost',
-  port : parseInt(process.env.RDB_PORT) || 28015,
-  db   : process.env.RDB_DB || 'rethink_miner'
+  servers: [{host: process.env.RDB_HOST || 'localhost',
+             port : parseInt(process.env.RDB_PORT) || 28015}],
+  db   : process.env.RDB_DB || 'rethink_miner',
 };  
 
 module.exports = app;

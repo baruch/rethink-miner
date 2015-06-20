@@ -15,8 +15,8 @@
     "async": "0.2.9",
     "forever": "0.10.11",
     "express-csv": "0.6.x",
-    "bluebird": "1.0.x",
-    "reql-then": "0.0.3"
+    "bluebird": "2.9.30",
+    "rethinkdbdash": "2.x"
   },
   "repository": {
     "type": "git",
